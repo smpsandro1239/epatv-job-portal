@@ -1,13 +1,20 @@
 <?php
 
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
 test('new users can register', function () {
-    $response = $this->post('/register', [
+    $response = $this->postJson('/api/register', [
         'name' => 'Test User',
         'email' => 'test@example.com',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'password123',
+        'password_confirmation' => 'password123',
+        'role' => 'student',
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertNoContent();
+    $response->assertStatus(201);
+    $this->assertDatabaseHas('users', [
+        'email' => 'test@example.com',
+        'role' => 'student',
+    ]);
 });
