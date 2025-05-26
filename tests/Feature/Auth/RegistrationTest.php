@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 test('new users can register', function () {
     $response = $this->postJson('/api/register', [
