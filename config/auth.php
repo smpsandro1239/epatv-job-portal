@@ -1,16 +1,7 @@
 <?php
 
 return [
-    'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-        'api' => [
-            'driver' => 'jwt', // Changed from 'sanctum' to 'jwt'
-            'provider' => 'users',
-        ],
-    ],
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults
@@ -23,8 +14,8 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+        'guard' => 'api',
+        'passwords' => 'users',
     ],
 
     /*
@@ -47,6 +38,10 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
+            'provider' => 'users',
+        ],
+        'api' => [
+            'driver' => 'jwt',
             'provider' => 'users',
         ],
     ],

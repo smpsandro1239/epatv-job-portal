@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+
         DB::table('areas_of_interest')->insert([
             ['name' => 'Programação Informática'],
             ['name' => 'Cabeleireiro'],

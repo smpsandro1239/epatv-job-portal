@@ -1,6 +1,8 @@
 <?php
 
-use App\Models\User;
+namespace Tests\Feature\Auth;
+
+use Tests\TestCase;
 
 test('new users can register', function () {
     $response = $this->postJson('/api/register', [

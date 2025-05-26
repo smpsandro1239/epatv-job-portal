@@ -1,38 +1,39 @@
 <?php
 
+namespace Tests\Feature\Auth;
+
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
+use Tests\TestCase;
 
 test('reset password link can be requested', function () {
     Notification::fake();
-
     $user = User::factory()->create();
 
-    $this->post('/forgot-password', ['email' => $user->email]);
+    $response = $this->postJson('/api/forgot-password', ['email' => $user->email]);
 
+    $response->assertOk();
     Notification::assertSentTo($user, ResetPassword::class);
 });
 
 test('password can be reset with valid token', function () {
-    Notification::fake();
-
+    Event::fake();
     $user = User::factory()->create();
 
-    $this->post('/forgot-password', ['email' => $user->email]);
+    $token = Password::createToken($user);
 
-    Notification::assertSentTo($user, ResetPassword::class, function (object $notification) use ($user) {
-        $response = $this->post('/reset-password', [
-            'token' => $notification->token,
-            'email' => $user->email,
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ]);
+    $response = $this->postJson('/api/reset-password', [
+        'token' => $token,
+        'email' => $user->email,
+        'password' => 'new-password',
+        'password_confirmation' => 'new-password',
+    ]);
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertStatus(200);
-
-        return true;
+    $response->assertOk();
+    Event::assertDispatched(\Illuminate\Auth\Events\PasswordReset::class, function ($event) use ($user) {
+        return $event->user->id === $user->id;
     });
 });

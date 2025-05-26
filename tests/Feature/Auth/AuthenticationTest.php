@@ -1,35 +1,44 @@
 <?php
 
+namespace Tests\Feature\Auth;
+
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Tests\TestCase;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'password' => Hash::make('password'),
+    ]);
 
-    $response = $this->post('/login', [
+    $response = $this->postJson('/api/login', [
         'email' => $user->email,
         'password' => 'password',
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertNoContent();
+    $response->assertOk();
+    $response->assertJsonStructure(['token']);
 });
 
 test('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 
-    $this->post('/login', [
+    $response = $this->postJson('/api/login', [
         'email' => $user->email,
         'password' => 'wrong-password',
     ]);
 
-    $this->assertGuest();
+    $response->assertUnauthorized();
 });
 
 test('users can logout', function () {
     $user = User::factory()->create();
+    $token = JWTAuth::fromUser($user);
 
-    $response = $this->actingAs($user)->post('/logout');
+    $response = $this->withHeader('Authorization', "Bearer $token")
+        ->postJson('/api/logout');
 
-    $this->assertGuest();
     $response->assertNoContent();
 });
