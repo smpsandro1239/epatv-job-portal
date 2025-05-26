@@ -2,8 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return ['Laravel' => app()->version()];
-});
-
-require __DIR__.'/auth.php';
+Route::view('/', 'welcome')->name('home');
+Route::view('/login', 'auth.login');
+Route::view('/register', 'auth.register');
