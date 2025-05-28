@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash; // Added
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject, MustVerifyEmail
@@ -18,6 +19,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'password',
         'role',
         'registration_status',
+        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -38,16 +40,11 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 
     public function getJWTCustomClaims()
     {
-        return [];
+        return ['role' => $this->role];
     }
-    protected static function boot()
-    {
-        parent::boot();
 
-        static::created(function ($user) {
-            if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail()) {
-                $user->sendEmailVerificationNotification();
-            }
-        });
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::make($value);
     }
 }
