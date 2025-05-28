@@ -2,20 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class RegistrationWindow extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'start_date',
-        'end_date',
+        'is_active',
+        'start_time',
+        'end_time',
+        'max_registrations',
+        'password',
+        'first_use_time',
+        'current_registrations',
     ];
 
     protected $casts = [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
+        'is_active' => 'boolean',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+        'first_use_time' => 'datetime',
     ];
 }
