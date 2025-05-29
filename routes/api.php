@@ -11,6 +11,9 @@ Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
     ->middleware('signed')
     ->name('verification.verify');
 
+Route::middleware(['auth:api', 'role:admin,superadmin'])->group(function () {
+    Route::get('/admin/dashboard', [App\Http\Controllers\Api\AdminController::class, 'dashboard']);
+});
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/user', function () {
