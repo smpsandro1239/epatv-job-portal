@@ -1,4 +1,4 @@
-  **artifactId**: "new-admin-controller-id"
+  **artifactId**: "fixed-admin-controller-id"
   **title**: "Api/AdminController.php"
   **contentType**: "text/x-php"
   ```php
@@ -8,7 +8,7 @@
 
     use App\Http\Controllers\Controller;
     use App\Models\User;
-    use App\Models\JobsEmployment; // Corrigido de JobEmployment'
+    use App\Models\JobsEmployment;
 
     class AdminController extends Controller
     {

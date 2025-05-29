@@ -1,5 +1,5 @@
-  **artifactId**: "new-jobs-employment-model-id"
-  **title**: "Api/JobsEmployment.php"
+  **artifactId**: "fixed-jobs-employment-id"
+  **title**: "Models/JobsEmployment.php"
   **contentType**: "text/x-php"
   ```php
   <?php
