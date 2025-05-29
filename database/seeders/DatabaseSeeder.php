@@ -80,7 +80,7 @@ class DatabaseSeeder extends Seeder
                 'start_time' => now()->subDay(),
                 'end_time' => now()->addDays(30),
                 'max_registrations' => 30,
-                'password' => Hash::make('test123'),
+                'password' => '$2y$12$NRtIK87Ik3DD25cdsV5FY.GTIko/ZMhCRs1skua2VmoY/wuWk3BFy',
                 'current_registrations' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -90,7 +90,7 @@ class DatabaseSeeder extends Seeder
                 'start_time' => now()->subDay(),
                 'end_time' => now()->addDays(30),
                 'max_registrations' => 30,
-                'password' => Hash::make('test123'),
+                'password' => '$2y$12$NRtIK87Ik3DD25cdsV5FY.GTIko/ZMhCRs1skua2VmoY/wuWk3BFy',
             ]);
         }
 
