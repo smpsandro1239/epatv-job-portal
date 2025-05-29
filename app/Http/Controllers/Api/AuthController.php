@@ -19,6 +19,9 @@ class AuthController extends Controller
 {
   public function register(Request $request)
   {
+    Log::info('Raw input: ' . $request->getContent());
+    Log::info('Parsed input: ' . json_encode($request->all()));
+    // ... resto do código
     try {
       Log::info('Registration request: ' . json_encode($request->all()));
       $validator = Validator::make($request->all(), [
