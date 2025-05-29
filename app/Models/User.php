@@ -6,7 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Hash; // Added
+use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject, MustVerifyEmail
@@ -20,6 +20,12 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'role',
         'registration_status',
         'email_verified_at',
+        'phone',
+        'course_completion_year',
+        'company_name',
+        'company_city',
+        'company_website',
+        'company_description',
     ];
 
     protected $hidden = [

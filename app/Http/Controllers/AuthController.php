@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api; // Fixed namespace
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -22,7 +22,9 @@ class AuthController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
-                'role' => 'required|in:candidate,employer,student,admin,superadmin', // Dynamic role
+                'role' => 'required|in:candidate,employer,student,admin,superadmin',
+                'phone' => 'nullable|string|max:20',
+                'course_completion_year' => 'nullable|integer|min:1900|max:' . date('Y'),
             ]);
 
             if ($validator->fails()) {
@@ -33,15 +35,17 @@ class AuthController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'role' => $request->role, // Use validated role
+                'role' => $request->role,
                 'registration_status' => 'pending',
                 'email_verified_at' => null,
+                'phone' => $request->phone,
+                'course_completion_year' => $request->course_completion_year,
             ]);
 
             Log::info('User created with role: ' . $user->role);
 
             try {
-                $user->sendEmailVerificationNotification(); // Send verification email
+                $user->sendEmailVerificationNotification();
             } catch (\Exception $e) {
                 Log::error('Email verification failed: ' . $e->getMessage());
             }
@@ -66,13 +70,24 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
+            Log::error('Login validation failed: ' . json_encode($validator->errors()));
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        if (!$token = JWTAuth::attempt($request->only('email', 'password'))) {
+        Log::info('Login attempt: ' . json_encode($request->only('email')));
+        $credentials = $request->only('email', 'password');
+        if (!$token = JWTAuth::attempt($credentials)) {
+            $user = User::where('email', $request->email)->first();
+            Log::error('Login failed', [
+                'email' => $request->email,
+                'user_exists' => !is_null($user),
+                'email_verified' => $user ? !is_null($user->email_verified_at) : false,
+                'registration_status' => $user ? $user->registration_status : 'none',
+            ]);
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+        Log::info('Login successful for email: ' . $request->email);
         return response()->json([
             'message' => 'Login successful',
             'token' => $token

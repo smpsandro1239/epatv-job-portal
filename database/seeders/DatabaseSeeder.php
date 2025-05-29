@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // Employer User (for company_id)
+        // Employer User
         if (!User::where('email', 'employer@example.com')->exists()) {
             $employer = User::create([
                 'name' => 'Test Employer',
@@ -85,6 +85,13 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+        } else {
+            RegistrationWindow::where('id', 1)->update([
+                'start_time' => now()->subDay(),
+                'end_time' => now()->addDays(30),
+                'max_registrations' => 30,
+                'password' => Hash::make('test123'),
+            ]);
         }
 
         // Jobs
@@ -104,8 +111,8 @@ class DatabaseSeeder extends Seeder
                 'title' => 'Técnico de Mecatrónica',
                 'description' => 'Vaga para técnico de mecatrónica.',
                 'company_id' => $employer->id,
-                'category_id' => $area->id,
-                'area_of_interest_id' => $area->id,
+                'category_id' => AreaOfInterest::where('name', 'Mecatrónica')->first()->id,
+                'area_of_interest_id' => AreaOfInterest::where('name', 'Mecatrónica')->first()->id,
                 'posted_by' => $adminUser->id,
                 'created_at' => now(),
                 'updated_at' => now(),
