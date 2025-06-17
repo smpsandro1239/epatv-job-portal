@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\Application;
+use App\Models\Job;
+use App\Models\AreaOfInterest;
 
 class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
@@ -21,6 +24,8 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'email_verified_at',
         'phone',
         'course_completion_year',
+        'photo', // Added
+        'cv',    // Added
         'company_name',
         'company_city',
         'company_website',
@@ -46,5 +51,27 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     public function getJWTCustomClaims()
     {
         return ['role' => $this->role];
+    }
+
+    // User as a candidate
+    public function applications()
+    {
+        return $this->hasMany(Application::class);
+    }
+
+    public function savedJobs()
+    {
+        return $this->belongsToMany(Job::class, 'saved_jobs', 'user_id', 'job_id');
+    }
+
+    public function areasOfInterest()
+    {
+        return $this->belongsToMany(AreaOfInterest::class, 'user_areas_of_interest', 'user_id', 'area_of_interest_id');
+    }
+
+    // User as an employer/company
+    public function postedJobs()
+    {
+        return $this->hasMany(Job::class, 'company_id');
     }
 }

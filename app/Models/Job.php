@@ -14,6 +14,10 @@ class Job extends Model
         'category_id',
         'area_of_interest_id',
         'posted_by',
+        'location',
+        'contract_type',
+        'salary',
+        'expiration_date',
     ];
 
     public function company()
@@ -23,7 +27,7 @@ class Job extends Model
 
     public function category()
     {
-        return $this->belongsTo(AreaOfInterest::class, 'category_id');
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function areaOfInterest()
