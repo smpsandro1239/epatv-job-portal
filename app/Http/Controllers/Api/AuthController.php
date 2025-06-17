@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\RegistrationWindow;
+use App\Models\Notification as DbNotification; // Renamed to avoid conflict with Laravel's Notification facade
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage; // Added for Storage
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\PendingRegistrationNotification;
@@ -32,10 +34,12 @@ class AuthController extends Controller
         'window_password' => 'required_if:role,candidate',
         'phone' => 'nullable|string|max:20',
         'course_completion_year' => 'nullable|integer|min:1900|max:' . date('Y'),
-        'company_name' => 'nullable|string|max:255',
+        // Company fields - company_name becomes required if role is employer
+        'company_name' => 'required_if:role,employer|nullable|string|max:255',
         'company_city' => 'nullable|string|max:255',
-        'company_website' => 'nullable|url',
+        'company_website' => 'nullable|url|string|max:255', // Ensure string and max length
         'company_description' => 'nullable|string',
+        'company_logo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Max 2MB
       ]);
 
       if ($validator->fails()) {
@@ -79,14 +83,50 @@ class AuthController extends Controller
         'company_city' => $request->company_city,
         'company_website' => $request->company_website,
         'company_description' => $request->company_description,
+        'company_logo' => null, // Default to null
       ]);
+
+      // Handle Company Logo Upload
+      if ($request->role === 'employer' && $request->hasFile('company_logo')) {
+          if ($user->company_logo) { // Check if there's an old logo, though unlikely for new registration
+              Storage::delete($user->company_logo);
+          }
+          $path = $request->file('company_logo')->store('public/company_logos');
+          $user->company_logo = $path;
+          $user->save(); // Save user again to update company_logo path
+      }
 
       Log::info('User created with role: ' . $user->role . ', ID: ' . $user->id);
 
       try {
         $user->sendEmailVerificationNotification();
-        if ($status === 'pending') {
-          Notification::send($user, new PendingRegistrationNotification($user));
+        if ($user->registration_status === 'pending') { // Check user's actual status after creation
+          // Notify student via DB notification
+          DbNotification::create([
+            'user_id' => $user->id,
+            'type' => 'PendingRegistrationNotification', // Custom type string
+            'data' => ['message' => 'Your registration is pending approval by an administrator.']
+          ]);
+
+          // Notify superadmins via DB notification
+          $superAdmins = User::where('role', 'superadmin')->get();
+          foreach ($superAdmins as $superAdmin) {
+            DbNotification::create([
+              'user_id' => $superAdmin->id,
+              'type' => 'StudentPendingApprovalNotification', // Custom type string
+              'data' => [
+                'message' => "New student registration for {$user->name} ({$user->email}) requires approval.",
+                'student_id' => $user->id,
+                'student_name' => $user->name,
+                'student_email' => $user->email,
+              ]
+            ]);
+          }
+
+          // The original email notification to superadmins about pending registration can remain or be adjusted
+          // Notification::send(User::where('role', 'superadmin')->get(), new PendingRegistrationNotification($request->all()));
+          // This was already in the code before user creation, might be redundant or for a different purpose.
+          // For now, focusing on adding the DB notifications as requested.
         }
       } catch (\Exception $e) {
         Log::error('Email notification failed: ' . $e->getMessage());
