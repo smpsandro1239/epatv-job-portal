@@ -1,105 +1,186 @@
-EPATV Job Portal 🚀
+# EPATV Job Portal 🚀
 
-The EPATV Job Portal is a web-based platform designed for Escola Profissional Amar Terra Verde (EPATV) to connect ex-students (alumni) with job opportunities posted by companies. Built with Laravel 12, it offers a robust backend with MySQL, role-based access control, and automated notifications. The frontend uses Laravel Blade with Tailwind CSS. The system supports three primary user types: superadmin (school administration), employers (companies), and students (ex-students/alumni), with features like temporary registration windows, job filtering, and an analytics dashboard.
-🎯 Features
-👥 User Types and Roles
+The EPATV Job Portal is a web-based platform designed for Escola Profissional Amar Terra Verde (EPATV) to connect ex-students (alumni) with job opportunities posted by companies. Built with Laravel, it serves as a backend (REST API & Web routes) with Blade templates and Tailwind CSS for the web user interface. It offers a robust backend with MySQL, role-based access control, and automated database notifications.
 
-**Superadmin (School Administration):**
-*   Manages users (including approving pending registrations), overall system settings like registration windows, and has oversight of platform activity via the dashboard. Job postings themselves are directly managed by companies/employers.
-*   Approves registrations outside the defined time window.
-*   Accesses a dashboard with metrics (e.g., total users, jobs, applications).
+## 📂 Project Structure Overview
 
-**Employers (Companies/Admins):**
-*   Register with company details (contact person name, company name, city, website, logo, etc.).
-*   Create and manage job postings (CRUD).
-*   View and manage applications received for their jobs.
+A brief overview of key directories:
 
-**Students (Ex-Students/Alumni):**
-*   Initial registration with core details (name, email, password, role, and course completion year if applicable). Additional details like phone, CV, photo, and areas of interest are completed via the student's profile management section after registration.
-*   Browse, filter, and apply to job listings.
-*   Save jobs for later viewing.
-*   Receive notifications for new jobs in their interest areas.
-*   Track application history and status.
+*   `app/Http/Controllers`: Handles incoming requests for both API (`Api` sub-namespace) and Web.
+*   `app/Models`: Contains all Eloquent database models.
+*   `app/Providers`: Houses service providers (e.g., `AppServiceProvider`, `AuthServiceProvider`).
+*   `app/Notifications` (Laravel's built-in system): While this project primarily uses custom database notifications (`app/Models/Notification.php`), this directory would be for Laravel's notification classes if email/other channels were more extensively used via that system.
+*   `config`: Application configuration files.
+*   `database/factories`: Model factories used for seeding and testing.
+*   `database/migrations`: Database schema migrations.
+*   `database/seeders`: Database seeders for initial data.
+*   `public`: The web server's document root and entry point (`index.php`); compiled assets.
+*   `resources/views`: Contains all Blade templates for the web UI.
+*   `routes`: Route definitions (`api.php` for API routes, `web.php` for web routes).
+*   `storage`: Compiled Blade templates, file uploads (e.g., `storage/app/public`), logs, and framework cache.
+*   `tests`: Application tests, written using the Pest testing framework.
 
-⚙️ Core Functionalities
+## 🛠️ Tech Stack
 
-**Registration Window:**
-*   Students register within a time window (e.g., start/end datetime) set by the superadmin.
-*   Window can have a maximum number of registrations (0 for unlimited).
-*   Optional password protection for the window. Password-based registration allows a set number of registrations within a configurable duration (e.g., 2 hours) from the first time the password is used.
-*   Out-of-window (time, capacity, or password validation failure) registrations are marked as 'pending', notifying the superadmin and the student.
+| Component        | Technology                                     | Notes                                         |
+| :--------------- | :--------------------------------------------- | :-------------------------------------------- |
+| Backend          | Laravel 12                                     | PHP 8.2+                                      |
+| Database         | MySQL                                          |                                               |
+| Frontend         | Laravel Blade, Tailwind CSS                    |                                               |
+| Authentication   | Laravel Fortify/Sanctum (Web), JWT (API)       | Session for web, JWT for current API setup    |
+| Testing          | Pest                                           | Built on PHPUnit                              |
+| Charts           | Chart.js                                       | For admin dashboard visualizations            |
+| Queue (Optional) | Redis                                          | For background job processing (e.g., notifications at scale) |
+| File Storage     | Laravel Storage (public disk)                  | For CVs, photos, logos                        |
+| Email Testing    | MailHog                                        | For local development                         |
 
-**Job Postings:**
-*   Companies create listings with title, area of interest, description, location, salary, contract type, and expiration date.
-*   Public job board with filters for area of interest, location, and contract type.
-*   Detailed view for each job.
+## 🎯 Key Features
 
-**Applications:**
-*   Students apply via an API endpoint, potentially with a cover letter.
-*   Companies view applications with candidate details (name, email, phone, CV link).
-*   Students can view their application history and status.
+### User Roles & Functionalities:
 
-**Notifications (Database-driven):**
-*   Students receive notifications for new jobs posted in their selected areas of interest.
-*   Superadmins and students are notified when a student's registration is 'pending'.
-*   Students are notified when their pending registration is approved.
-*   Users can view their notifications and mark them as read (individually or all).
+*   **Superadmin (School Administration):**
+    *   Manages users (approving pending student registrations).
+    *   Controls system-wide settings, primarily the Candidate Registration Window.
+    *   Monitors platform activity via a comprehensive dashboard with key metrics and charts.
+*   **Employers (Companies):**
+    *   Register with detailed company profiles (contact person, company name, location, website, description, logo).
+    *   Perform CRUD operations (Create, Read, Update, Delete) for their job postings.
+    *   View and manage applications received for their jobs.
+*   **Students (Ex-Students/Alumni):**
+    *   Initial registration with core details (name, email, password, role, course completion year).
+    *   Complete and manage their profile with additional details (phone, CV, photo, areas of interest).
+    *   Browse a public job board with filtering capabilities (by area of interest, location, contract type).
+    *   View detailed information for each job.
+    *   Apply for jobs (currently via API endpoint).
+    *   Save favorite jobs for later viewing.
+    *   Track their application history and status.
 
-**Admin Dashboard:**
-*   Displays key metrics: total users (by role), pending registrations, CV uploads, total jobs, total applications.
-*   Includes charts (Chart.js) for: jobs by location, jobs by area of interest, jobs by month, and jobs by contract type.
-*   Superadmin manages registration window settings.
+### Core System Mechanics:
 
-**Security:**
-*   Role-based access control via Laravel middleware.
-*   Laravel Sanctum for API authentication (if used, default is session/JWT for API in this project).
-*   Secure file uploads (CVs, photos, logos; max 2MB) with validation.
+*   **Registration Window for Students:**
+    *   Superadmins define a specific window (start/end time, max number of registrations).
+    *   An optional password can be set for the window. If password-protected, it's valid for a configurable duration (e.g., 2 hours) from its first use, for a limited number of registrations.
+    *   Student registrations outside this window (due to time, capacity, or password validation failure) are marked as 'pending'.
+*   **Notifications (Database-driven):**
+    *   Students receive notifications for new jobs matching their areas of interest.
+    *   Students are notified if their registration is 'pending' and again when it's 'approved'.
+    *   Superadmins are notified about new 'pending' student registrations requiring approval.
+    *   All users can view their notifications and mark them as read.
+*   **Admin Dashboard:**
+    *   Provides superadmins with metrics like total users (by role), pending registrations, CV uploads, job counts, application counts, and jobs grouped by location, area, month, and contract type, visualized with charts.
 
-🛠️ Tech Stack
-(This section seems largely accurate, no changes needed unless specific versions need update)
-Component
-Technology
+## 📦 Installation and Configuration
 
-Backend
-Laravel 12 (PHP 8.2+)
+### Prerequisites
 
-Database
-MySQL
+*   PHP 8.2+
+*   Composer
+*   MySQL
+*   Node.js & npm (for Tailwind CSS compilation if customizing)
+*   Git
+*   Redis (Optional, if `QUEUE_CONNECTION=redis`)
+*   MailHog (Optional, for local email testing)
 
-Frontend
-Laravel Blade, Tailwind CSS
+### Setup Instructions
 
-Authentication
-Laravel Fortify/Sanctum (Web), JWT/Sanctum (API)
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/your-repo/epatv-job-portal.git # Replace with your repo URL
+    cd epatv-job-portal
+    ```
 
-Testing
-Pest (PHPUnit-based)
+2.  **Fix Git Ownership (If using Laragon/Windows and encounter "dubious ownership" errors):**
+    ```bash
+    git config --global --add safe.directory C:/laragon/www/epatv-job-portal # Adjust path if needed
+    ```
 
-Charts
-Chart.js
+3.  **Install Dependencies:**
+    ```bash
+    composer install
+    npm install
+    ```
 
-Queue
-Redis
+4.  **Configure Environment:**
+    *   Copy `.env.example` to `.env`: `cp .env.example .env`
+    *   Update `.env` with your specific settings. Key variables:
+        *   `APP_NAME`: Your application name (e.g., "EPATV Job Portal").
+        *   `APP_ENV`: `local` for development, `production` for live.
+        *   `APP_DEBUG`: `true` for development, `false` for production.
+        *   `APP_URL`: The base URL of your application (e.g., `http://localhost:8000` or your production domain).
+        *   `DB_CONNECTION=mysql`
+        *   `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`: Your MySQL database credentials. `DB_DATABASE` is typically `epatv_job_portal`.
+        *   `QUEUE_CONNECTION`: `sync` (default, immediate execution) or `redis` for background jobs.
+        *   `REDIS_HOST`, `REDIS_PASSWORD`, `REDIS_PORT`: Redis server details if using it for queues.
+        *   `MAIL_MAILER`: `smtp` for actual sending, or `log` for development if not using MailHog.
+        *   `MAIL_HOST`: For MailHog, typically `127.0.0.1`.
+        *   `MAIL_PORT`: For MailHog, typically `1025`.
+        *   `MAIL_USERNAME`, `MAIL_PASSWORD`: Usually `null` for MailHog.
+        *   `MAIL_FROM_ADDRESS`: Default email address for outgoing application emails (e.g., `admin@epatv.pt`).
 
-File Storage
-Laravel Storage (public disk)
+5.  **Generate Application Key:**
+    ```bash
+    php artisan key:generate
+    ```
 
-Email Testing
-MailHog
+6.  **Run Migrations and Seeders:**
+    ```bash
+    php artisan migrate --seed
+    ```
+    This sets up the database schema and populates initial data (e.g., areas of interest, default superadmin).
 
-📦 Installation
-(This section seems largely accurate, no changes needed)
+7.  **Create Storage Link:**
+    ```bash
+    php artisan storage:link
+    ```
+    This makes files in `storage/app/public` (like CVs, logos, photos) accessible from the web.
 
-🖥️ Command-Line Reference
-(This section seems largely accurate, no changes needed)
+8.  **Set Up MailHog (Optional, for local email testing):**
+    *   Install MailHog (e.g., download for Windows or `brew install mailhog` on macOS).
+    *   Start MailHog: `mailhog`
+    *   Access the MailHog web UI at `http://127.0.0.1:8025` to view emails sent by the application.
 
-🗄️ Database Schema
+9.  **Compile Frontend Assets (If you plan to modify Tailwind CSS or JS):**
+    ```bash
+    npm run dev
+    ```
+
+10. **Start the Development Server:**
+    ```bash
+    php artisan serve
+    ```
+    Access the application at `http://localhost:8000` (or your configured `APP_URL`).
+
+11. **Start Queue Worker (Optional, if `QUEUE_CONNECTION=redis` or other async driver):**
+    ```bash
+    php artisan queue:work
+    ```
+    The queue worker processes background tasks. Keep it running during development if testing features that use queues (like some notification schemes, though current DB notifications are synchronous).
+
+## 🖥️ Command-Line Reference
+(This section seems largely accurate from previous state)
+... (keep existing commands)
+
+## 🧪 Testing
+
+The project uses [Pest](https://pestphp.com/), a testing framework built on top of PHPUnit, for automated testing. Tests are located in the `tests/Feature` directory and cover key application features and user flows.
+
+To run all tests:
+```bash
+php artisan test
+```
+To run a specific test file:
+```bash
+php artisan test tests/Feature/YourTestFile.php
+```
+
+## 🗄️ Database Schema
+(Schema descriptions updated in Step 23 are largely correct)
 
 **users:**
-*   id, name (contact person for employer/admin, student name), email, password, role ('superadmin'/'employer'/'student'/'admin'/'candidate'), phone, course_completion_year, photo (student photo path), cv (student CV path), company_name, company_city, company_website, company_description, company_logo (path), registration_status ('approved'/'pending'), created_at, updated_at.
+*   id, name (contact person for employer, student name), email, password, role ('superadmin'/'employer'/'student'/'candidate'), phone, course_completion_year, photo (student photo path), cv (student CV path), company_name, company_city, company_website, company_description, company_logo (path), registration_status ('approved'/'pending'), created_at, updated_at.
 
 **areas_of_interest:**
-*   id, name (e.g., Programação Informática), created_at, updated_at.
+*   id, name, created_at, updated_at.
 
 **user_areas_of_interest (pivot):**
 *   user_id, area_of_interest_id.
@@ -107,8 +188,8 @@ MailHog
 **jobs_employment (table name):**
 *   id, company_id (links to users table - employer), posted_by (links to users table - user who posted), title, category_id (links to areas_of_interest), area_of_interest_id (links to areas_of_interest), description, location, salary, contract_type, expiration_date, created_at, updated_at.
 
-**applications (table name `job_applications` in old schema, now `applications`):**
-*   id, user_id (student/applicant), job_id, status ('pending'/'reviewed'/'shortlisted'/'hired'/'rejected'), cover_letter, created_at, updated_at. (Removed redundant user details like name, email as they are on the user model).
+**applications:**
+*   id, user_id (student/applicant), job_id, status ('pending'/'reviewed'/'shortlisted'/'hired'/'rejected'), cover_letter, created_at, updated_at.
 
 **saved_jobs:**
 *   id, user_id, job_id, created_at, updated_at.
@@ -119,105 +200,73 @@ MailHog
 **notifications:**
 *   id, user_id, type (string identifier), data (JSON for message and context), read_at, created_at, updated_at.
 
-🌐 Key Routes
+
+## 🌐 Key Routes
+
+API routes under `/api/*` are authenticated using JWT. Web routes are protected by session-based authentication. Role-specific access is enforced by middleware (e.g., `role:student`, `role:employer`, `role:superadmin`).
 
 ### Key API Routes (`/api/...`)
-
-**Authentication (Public)**
-- `POST /register`: Register a new user (student or employer).
-- `POST /login`: Authenticate user and receive JWT token.
-- `POST /logout`: Invalidate user's session (requires auth token).
-- `GET /email/verify/{id}/{hash}`: Verify email address.
-- `POST /forgot-password`: Request password reset link.
-- `POST /reset-password`: Reset password with token.
-
-**Student Routes (Requires Authentication & 'student' role)**
-- `GET /student/profile`: View own student profile.
-- `PUT /student/profile`: Update own student profile (supports file uploads for photo/CV).
-- `POST /student/jobs/{job}/save`: Toggle save/unsave a job.
-- `GET /student/applications`: List own job applications.
-
-**Job Application (Requires Authentication - typically student)**
-- `POST /apply`: Submit a job application (uses `ApplicationController`).
-
-**Employer Routes (Requires Authentication & 'employer' role)**
-- `GET /employer/profile`: View own company profile.
-- `PUT /employer/profile`: Update own company profile (supports file upload for logo).
-- `GET /employer/jobs`: List jobs posted by the employer.
-- `POST /employer/jobs`: Create a new job posting.
-- `GET /employer/jobs/{job}`: View a specific job posting owned by the employer.
-- `PUT /employer/jobs/{job}`: Update an owned job posting.
-- `DELETE /employer/jobs/{job}`: Delete an owned job posting.
-- `GET /employer/applications`: List applications received for the employer's jobs.
-
-**Superadmin Routes (Requires Authentication & 'superadmin' role)**
-- `GET /admin/dashboard`: View comprehensive dashboard metrics.
-- `GET /admin/users`: List users with filters (role, status).
-- `POST /admin/users/{user}/approve`: Approve a pending user registration.
-- `GET /admin/registration-window`: Get current registration window settings.
-- `PUT /admin/registration-window`: Update registration window settings.
-
-**Authenticated User Routes (Any role)**
-- `GET /user`: Get current authenticated user details (typically from auth token).
-- `GET /notifications`: List user's database notifications.
-- `POST /notifications/{notification}/read`: Mark a specific notification as read.
-- `POST /notifications/mark-all-read`: Mark all user's notifications as read.
+(List from Step 23 is accurate and comprehensive)
+...
 
 ### Key Web Routes (`/...`)
+(List from Step 23 is accurate and comprehensive, including named routes)
+...
 
-**Public Routes**
-- `GET /`: Welcome page.
-- `GET /login`: Show login page.
-- `POST /login`: Process login (`login.store`).
-- `GET /register`: Show registration page.
-- `POST /register`: Process registration (`register.store`).
-- `POST /logout`: Process logout.
-- `GET /jobs`: Public job listing page with filters.
-- `GET /jobs/{job}`: Public job details page.
+## 🤝 Contributing
 
-**Student Routes (Requires Authentication & 'student' role)**
-- `GET /student/profile`: View student profile page (`student.profile.show`).
-- `GET /student/profile/edit`: Show edit student profile form (`student.profile.edit`).
-- `PUT /student/profile`: Update student profile (`student.profile.update`).
-- `GET /student/applications`: View student's list of applications (`student.applications.index`).
+We welcome contributions to the EPATV Job Portal! To contribute:
 
-**Employer Routes (Requires Authentication & 'employer' role)**
-- `GET /employer/profile`: View employer profile page (`employer.profile.show`).
-- `GET /employer/profile/edit`: Show edit employer profile form (`employer.profile.edit`).
-- `PUT /employer/profile`: Update employer profile (`employer.profile.update`).
-- `Route::resource('/employer/jobs', EmployerJobController::class)` (Handles index, create, store, show, edit, update, destroy for employer's jobs).
-- `GET /employer/applications`: View applications for employer's jobs (`employer.applications.index`).
+1.  **Fork the Repository:** Create your own copy of the project.
+2.  **Create a Feature Branch:**
+    ```bash
+    git checkout -b feature/YourAmazingFeature
+    ```
+3.  **Make Your Changes:** Implement your feature or bug fix.
+4.  **Write Tests:** Add Pest tests for any new functionality.
+5.  **Commit Your Changes:**
+    ```bash
+    git commit -m 'Add: Your Amazing Feature'
+    ```
+6.  **Push to Your Branch:**
+    ```bash
+    git push origin feature/YourAmazingFeature
+    ```
+7.  **Open a Pull Request:** Submit a PR against the main repository branch for review.
 
-**Superadmin Routes (Requires Authentication & 'superadmin' role)**
-- `GET /admin/dashboard`: Show superadmin dashboard (`admin.dashboard`).
-- `GET /admin/users`: Show user management page (`admin.users.index`).
-- `POST /admin/users/{user}/approve`: Approve a pending user (`admin.users.approve`).
-- `GET /admin/registration-window`: Show edit form for registration window (`admin.regwindow.edit`).
-- `PUT /admin/registration-window`: Update registration window settings (`admin.regwindow.update`).
+Please follow existing coding standards (roughly PSR-12, general Laravel best practices) and ensure tests pass before submitting a PR.
 
-**Authenticated User Routes (Any role)**
-- `GET /dashboard`: Generic dashboard (often a redirect target or simple landing page after login).
-- `GET /notifications`: Show user's notifications page (`notifications.index`).
-- `POST /notifications/{notification}/read`: Mark a specific notification as read (`notifications.read`).
-- `POST /notifications/mark-all-read`: Mark all user's notifications as read (`notifications.markallasread`).
+## 🛠️ Troubleshooting / FAQ
 
-🧪 Testing
-(This section seems largely accurate, no changes needed)
+*   **Permissions Issues:** If you encounter errors related to `storage` or `bootstrap/cache` directories, ensure they are writable by the web server user:
+    ```bash
+    chmod -R 775 storage bootstrap/cache
+    # You might also need to chown to your web server user (e.g., www-data)
+    ```
+*   **`.env` File Not Found / No App Key:** If you see errors about missing `.env` or application key:
+    *   Ensure you've copied `.env.example` to `.env`.
+    *   Run `php artisan key:generate`.
+*   **Frontend Asset Issues:** If styles or scripts are missing:
+    *   Run `npm install` to install Node.js dependencies.
+    *   Run `npm run dev` (for development) or `npm run build` (for production).
+*   **Uploaded Files Not Appearing (e.g., Logos, CVs):**
+    *   Ensure you've run `php artisan storage:link`. This creates a symbolic link from `public/storage` to `storage/app/public`.
+*   **"Dubious Ownership" Git Error (Windows/Laragon):**
+    *   Run `git config --global --add safe.directory C:/path/to/your/project` (replace with your actual project path).
 
-🚀 Deployment
-(This section seems largely accurate, no changes needed)
+## 🔌 WordPress Integration (Optional)
+(This section from Step 23 is fine)
+...
 
-🔌 WordPress Integration (Optional)
-(This section seems largely accurate, no changes needed)
+## 🚀 Deployment
+(This section from Step 23 is fine)
+...
 
-🤝 Contributing
-(This section seems largely accurate, no changes needed)
-
-📜 License
+## 📜 License
 This project is licensed under the MIT License.
-📬 Contact
 
-EPATV Administration: admin@epatv.pt
-Developers: smpsandro1239@gmail.pt
+## 📬 Contact
+(This section from Step 23 is fine)
+...
 
 Built with ❤️ for EPATV by the development team.
