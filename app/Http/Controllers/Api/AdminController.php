@@ -7,11 +7,16 @@ use App\Models\User;
 use App\Models\Job;
 use App\Models\Application; // Added
 use App\Models\AreaOfInterest; // Added
+use App\Models\User;
+use App\Models\Job;
+use App\Models\Application;
+use App\Models\AreaOfInterest;
 use App\Models\RegistrationWindow;
+use App\Models\Notification as DbNotification; // Added DbNotification
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // Added
-use Illuminate\Support\Facades\Notification; // For future notifications
-use App\Notifications\RegistrationApprovedNotification; // For future notifications
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification; // For Laravel's email notifications
+// use App\Notifications\RegistrationApprovedNotification; // This would be for Laravel's email notifications
 
 class AdminController extends Controller
 {
@@ -109,8 +114,17 @@ class AdminController extends Controller
         // }
         $user->save();
 
-        // TODO: Send RegistrationApprovedNotification in a later step
-        // Notification::send($user, new RegistrationApprovedNotification());
+        // Create a database notification for the approved student
+        DbNotification::create([
+            'user_id' => $user->id,
+            'type' => 'RegistrationApprovedNotification', // Custom type string
+            'data' => ['message' => 'Congratulations! Your registration has been approved. You can now log in and access all student features.']
+        ]);
+
+        // If Laravel's built-in email notifications are also desired for this:
+        // if (class_exists(RegistrationApprovedNotification::class)) {
+        //     Notification::send($user, new RegistrationApprovedNotification());
+        // }
 
         return response()->json(['message' => 'User registration approved successfully.', 'user' => $user]);
     }

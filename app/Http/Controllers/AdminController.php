@@ -4,13 +4,14 @@ namespace App\Http\Controllers; // Web Controller Namespace
 
 use App\Models\User;
 use App\Models\RegistrationWindow;
-use App\Models\Job; // Added
-use App\Models\Application; // Added
-use App\Models\AreaOfInterest; // Added
+use App\Models\Job;
+use App\Models\Application;
+use App\Models\AreaOfInterest;
+use App\Models\Notification as DbNotification; // Added
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB; // Added
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -74,8 +75,17 @@ class AdminController extends Controller
         // }
         $user->save();
 
-        // TODO: Dispatch RegistrationApprovedNotification (later step)
-        // Notification::send($user, new RegistrationApprovedNotification());
+        // Create a database notification for the approved student
+        DbNotification::create([
+            'user_id' => $user->id,
+            'type' => 'RegistrationApprovedNotification', // Custom type string
+            'data' => ['message' => 'Congratulations! Your registration has been approved. You can now log in and access all student features.']
+        ]);
+
+        // TODO: Dispatch Laravel Email Notification if needed (e.g., using App\Notifications\RegistrationApprovedNotification)
+        // if (class_exists(\App\Notifications\RegistrationApprovedNotification::class)) {
+        //     \Illuminate\Support\Facades\Notification::send($user, new \App\Notifications\RegistrationApprovedNotification());
+        // }
 
         return redirect()->route('admin.users.index')->with('success', 'User registration approved successfully for ' . $user->email);
     }

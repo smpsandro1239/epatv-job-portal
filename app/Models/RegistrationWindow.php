@@ -12,6 +12,7 @@ class RegistrationWindow extends Model
         'end_time',
         'max_registrations',
         'password',
+        'password_valid_duration_hours', // Added
         'first_use_time',
         'current_registrations',
     ];
