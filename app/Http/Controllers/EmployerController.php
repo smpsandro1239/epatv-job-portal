@@ -94,20 +94,39 @@ class EmployerController extends Controller
         // Middleware 'role:employer' handles role check.
 
         $jobIds = $employer->postedJobs()->pluck('id');
+        $applicationsQuery = \App\Models\Application::whereIn('job_id', $jobIds);
 
-        $applications = \App\Models\Application::whereIn('job_id', $jobIds)
-            ->with([
-                'user' => function ($query) { // Applicant details
-                    // Select fields needed for the view, including 'cv' for the link
-                    $query->select('id', 'name', 'email', 'phone', 'cv');
-                },
-                'job' => function ($query) { // Job details
-                    $query->select('id', 'title', 'location');
-                }
-            ])
-            ->latest() // Order by latest applications first
-            ->paginate(10); // Paginate for web view
+        // Filter by Job
+        if ($request->filled('filter_job_id')) {
+            $applicationsQuery->where('job_id', $request->input('filter_job_id'));
+        }
 
-        return view('employer.applications.index', compact('applications'));
+        // Filter by Status
+        if ($request->filled('filter_status')) {
+            $applicationsQuery->where('status', $request->input('filter_status'));
+        }
+
+        $applications = $applicationsQuery->with([
+            'user' => function ($query) { // Applicant details
+                $query->select('id', 'name', 'email', 'phone', 'cv');
+            },
+            'job' => function ($query) { // Job details
+                $query->select('id', 'title', 'location');
+            }
+        ])
+        ->latest() // Order by latest applications first
+        ->paginate(10); // Paginate for web view
+
+        // For filter dropdowns
+        $employerJobs = $employer->postedJobs()->select('id', 'title')->orderBy('title')->get();
+        // Using a fixed list of statuses for the filter, can be dynamic if needed
+        $statuses = ['pending', 'reviewed', 'shortlisted', 'hired', 'rejected'];
+
+        return view('employer.applications.index', [
+            'applications' => $applications,
+            'employerJobs' => $employerJobs,
+            'statuses' => $statuses,
+            'filters' => $request->only(['filter_job_id', 'filter_status']),
+        ]);
     }
 }

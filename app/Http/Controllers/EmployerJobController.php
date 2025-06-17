@@ -20,6 +20,7 @@ class EmployerJobController extends Controller
         $employer = Auth::user();
         $jobs = Job::where('company_id', $employer->id)
                     ->with('areaOfInterest')
+                    ->withCount('applications') // Added application count
                     ->latest()
                     ->paginate(10); // Paginate for web view
 
@@ -96,8 +97,8 @@ class EmployerJobController extends Controller
         if ($job->company_id !== $employer->id) {
             abort(403, 'Unauthorized action.');
         }
-        $job->load('areaOfInterest'); // Eager load for display
-        return view('employer.jobs.show', compact('job')); // Assuming a show view might be useful
+        $job->load(['areaOfInterest', 'company', 'postedBy'])->loadCount('applications'); // Eager load for display & count
+        return view('employer.jobs.show', compact('job'));
     }
 
 

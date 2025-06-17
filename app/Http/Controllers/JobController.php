@@ -53,4 +53,26 @@ class JobController extends Controller
             'filters' => $request->all(), // Pass all current request parameters to the view for filter persistence
         ]);
     }
+
+    /**
+     * Display the specified job.
+     *
+     * @param  \App\Models\Job  $job
+     * @return \Illuminate\View\View
+     */
+    public function show(Job $job)
+    {
+        $job->load(['company' => function ($query) {
+            // Select specific fields from the User model representing the company
+            $query->select('id', 'name', 'company_name', 'company_logo', 'company_website', 'company_description');
+        }, 'areaOfInterest']);
+
+        // For "Save Job" button state if student is logged in
+        $isSaved = false;
+        if (Auth::check() && Auth::user()->role === 'student') {
+            $isSaved = Auth::user()->savedJobs()->where('job_id', $job->id)->exists();
+        }
+
+        return view('jobs.show', compact('job', 'isSaved'));
+    }
 }
