@@ -39,7 +39,7 @@ class StudentApplicationTest extends TestCase
         return Job::factory()->create($attributes);
     }
 
-    private function createApplication(array $attributes = []): Application
+    public function createTestApplication(array $attributes = []): Application
     {
         if (!isset($attributes['user_id'])) {
             $attributes['user_id'] = $this->createStudent()->id;
@@ -57,12 +57,12 @@ class StudentApplicationTest extends TestCase
         $student = $this->createStudent();
         $job1 = $this->createJob();
         $job2 = $this->createJob();
-        $this->createApplication(['user_id' => $student->id, 'job_id' => $job1->id]);
-        $this->createApplication(['user_id' => $student->id, 'job_id' => $job2->id]);
+        $this->createTestApplication(['user_id' => $student->id, 'job_id' => $job1->id]);
+        $this->createTestApplication(['user_id' => $student->id, 'job_id' => $job2->id]);
 
         // Create an application for another student to ensure it's not listed
         $otherStudent = $this->createStudent();
-        $this->createApplication(['user_id' => $otherStudent->id, 'job_id' => $job1->id]);
+        $this->createTestApplication(['user_id' => $otherStudent->id, 'job_id' => $job1->id]);
 
         $token = JWTAuth::fromUser($student);
         $response = $this->withHeaders(['Authorization' => "Bearer {$token}"])
@@ -96,7 +96,7 @@ class StudentApplicationTest extends TestCase
     {
         $student = $this->createStudent();
         $job1 = $this->createJob();
-        $this->createApplication(['user_id' => $student->id, 'job_id' => $job1->id, 'status' => 'Applied']);
+        $this->createTestApplication(['user_id' => $student->id, 'job_id' => $job1->id, 'status' => 'Applied']);
 
         $response = $this->actingAs($student)->get('/student/applications');
 
@@ -132,19 +132,19 @@ class StudentApplicationTest extends TestCase
         $response = $this->withHeaders(['Authorization' => "Bearer {$token}"])
                          ->postJson('/api/apply', [
                              'job_id' => $job->id,
-                             'cover_letter' => $coverLetter,
+                             'message' => $coverLetter, // Changed from cover_letter
                          ]);
 
         $response->assertStatus(201)
                  ->assertJsonPath('application.job_id', $job->id)
                  ->assertJsonPath('application.user_id', $student->id)
                  ->assertJsonPath('application.status', 'pending')
-                 ->assertJsonPath('application.cover_letter', $coverLetter);
+                 ->assertJsonPath('application.message', $coverLetter); // Changed from cover_letter
 
         $this->assertDatabaseHas('applications', [
             'user_id' => $student->id,
             'job_id' => $job->id,
-            'cover_letter' => $coverLetter,
+            'message' => $coverLetter, // Changed from cover_letter
             'status' => 'pending',
         ]);
     }
@@ -154,7 +154,7 @@ class StudentApplicationTest extends TestCase
         $student = $this->createStudent();
         $token = JWTAuth::fromUser($student);
         $response = $this->withHeaders(['Authorization' => "Bearer {$token}"])
-                         ->postJson('/api/apply', ['cover_letter' => 'Test']);
+                         ->postJson('/api/apply', ['message' => 'Test']); // Changed from cover_letter
 
         $response->assertStatus(422)->assertJsonValidationErrors('job_id');
     }

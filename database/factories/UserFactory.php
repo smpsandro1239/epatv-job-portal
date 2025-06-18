@@ -29,6 +29,12 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'phone' => $this->faker->optional()->phoneNumber(),
+            'course_completion_year' => $this->faker->optional()->year(),
+            'cv' => $this->faker->optional()->word() . '.pdf', // Store a fake path
+            'photo' => $this->faker->optional()->imageUrl(),    // Store a fake image URL
+            'role' => 'student', // Default role
+            'registration_status' => 'approved', // Default status
         ];
     }
 

@@ -53,7 +53,7 @@ class EmployerApplicationViewingTest extends TestCase
         ], $attributes));
     }
 
-    private function createApplication(User $student, Job $job, array $attributes = []): Application
+    public function createTestApplication(User $student, Job $job, array $attributes = []): Application
     {
         return Application::factory()->create(array_merge([
             'user_id' => $student->id,
@@ -72,12 +72,12 @@ class EmployerApplicationViewingTest extends TestCase
         $student1 = $this->createStudent();
         $student2 = $this->createStudent();
 
-        $app1 = $this->createApplication($student1, $job1);
-        $app2 = $this->createApplication($student2, $job2);
+        $app1 = $this->createTestApplication($student1, $job1);
+        $app2 = $this->createTestApplication($student2, $job2);
         // Application for another employer's job
         $employer2 = $this->createEmployer();
         $job_other_employer = $this->createJobForEmployer($employer2);
-        $this->createApplication($student1, $job_other_employer);
+        $this->createTestApplication($student1, $job_other_employer);
 
         $token = JWTAuth::fromUser($employer1);
         $response = $this->withHeaders(['Authorization' => "Bearer {$token}"])
@@ -96,7 +96,7 @@ class EmployerApplicationViewingTest extends TestCase
         $employer = $this->createEmployer();
         $job = $this->createJobForEmployer($employer);
         for ($i=0; $i < 20; $i++) {
-            $this->createApplication($this->createStudent(['email' => "student{$i}@example.com"]), $job);
+            $this->createTestApplication($this->createStudent(['email' => "student{$i}@example.com"]), $job);
         }
 
         $token = JWTAuth::fromUser($employer);
@@ -132,10 +132,10 @@ class EmployerApplicationViewingTest extends TestCase
         $student1 = $this->createStudent(['cv' => 'cvs/student1_cv.pdf']); // Ensure CV path
         Storage::disk('public')->put($student1->cv, 'fake cv'); // Create fake file
 
-        $app1 = $this->createApplication($student1, $job1);
+        $app1 = $this->createTestApplication($student1, $job1);
 
         // Application for another employer's job
-        $this->createApplication($this->createStudent(), $this->createJobForEmployer($this->createEmployer()));
+        $this->createTestApplication($this->createStudent(), $this->createJobForEmployer($this->createEmployer()));
 
         $response = $this->actingAs($employer1)->get('/employer/applications');
 
@@ -154,7 +154,7 @@ class EmployerApplicationViewingTest extends TestCase
         $employer = $this->createEmployer();
         $job = $this->createJobForEmployer($employer);
         for ($i=0; $i < 12; $i++) { // Default web pagination is 10
-            $this->createApplication($this->createStudent(['email' => "student{$i}web@example.com"]), $job);
+            $this->createTestApplication($this->createStudent(['email' => "student{$i}web@example.com"]), $job);
         }
 
         $response = $this->actingAs($employer)->get('/employer/applications');

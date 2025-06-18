@@ -1,8 +1,4 @@
-  **artifactId**: "application-model-id"
-  **title**: "Application.php"
-  **contentType**: "text/x-php"
-  ```php
-  <?php
+<?php
 
     namespace App\Models;
 

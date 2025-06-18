@@ -18,42 +18,40 @@
                 <div class="flex justify-between items-center py-4">
                     <a href="{{ route('home') }}" class="text-xl font-bold">{{ config('app.name', 'Job Portal') }}</a>
 
-                    <div class="space-x-2 md:space-x-4 text-sm md:text-base"> {{ Adjusted spacing for smaller screens }}
-                        <a href="{{ route('jobs.index') }}" class="{{ request()->routeIs('jobs.index*') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md">Jobs</a>
+                    <div class="flex items-center space-x-4"> <!-- Simplified this div -->
+                        <a href="{{ route('jobs.index') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">Jobs</a>
 
                         @guest
-                            <a href="{{ route('login') }}" class="{{ request()->routeIs('login') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md">Login</a>
-                            <a href="{{ route('register') }}" class="{{ request()->routeIs('register') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md">Register</a>
+                            <a href="{{ route('login') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">Login</a>
+                            <a href="{{ route('register') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">Register</a>
                         @endguest
 
                         @auth
                             @if(Auth::user()->role === 'student')
-                                <a href="{{ route('student.profile.show') }}" class="{{ request()->routeIs('student.profile.*') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md">My Profile</a>
-                                <a href="{{ route('student.applications.index') }}" class="{{ request()->routeIs('student.applications.*') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md">My Applications</a>
+                                <a href="{{ route('student.profile.show') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">My Profile</a>
+                                <a href="{{ route('student.applications.index') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">My Applications</a>
                             @endif
 
                             @if(Auth::user()->role === 'employer')
-                                <a href="{{ route('employer.profile.show') }}" class="{{ request()->routeIs('employer.profile.*') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md">Company Profile</a>
-                                <a href="{{ route('employer.jobs.index') }}" class="{{ request()->routeIs('employer.jobs.*') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md">My Jobs</a>
-                                <a href="{{ route('employer.applications.index') }}" class="{{ request()->routeIs('employer.applications.*') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md">Job Applications</a>
+                                <a href="{{ route('employer.profile.show') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">Company Profile</a>
+                                <a href="{{ route('employer.jobs.index') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">My Jobs</a>
+                                <a href="{{ route('employer.applications.index') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">Job Applications</a>
                             @endif
 
                             @if(Auth::user()->role === 'superadmin')
-                                <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md">Admin Dashboard</a>
-                                <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md">User Management</a>
-                                <a href="{{ route('admin.regwindow.edit') }}" class="{{ request()->routeIs('admin.regwindow.*') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md">Reg. Window</a>
+                                <a href="{{ route('admin.dashboard') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">Admin Dashboard</a>
+                                <a href="{{ route('admin.users.index') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">User Management</a>
+                                <a href="{{ route('admin.regwindow.edit') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">Reg. Window</a>
                             @endif
 
-                            <a href="{{ route('notifications.index') }}" class="{{ request()->routeIs('notifications.*') ? 'text-yellow-300 font-semibold' : '' }} px-2 py-1 hover:text-blue-200 rounded-md relative">
+                            <a href="{{ route('notifications.index') }}" class="px-2 py-1 hover:text-blue-200 rounded-md relative">
                                 Notifications
-                                {{-- Basic unread count - ideally use a View Composer for this across all pages --}}
-                                @if(Auth::user()->notifications()->whereNull('read_at')->count() > 0)
-                                    @php $unreadNotificationsCount = Auth::user()->notifications()->whereNull('read_at')->count(); @endphp
-                                    @if($unreadNotificationsCount > 0)
-                                        <span class="absolute -top-1 -right-2.5 ml-1 inline-block py-0.5 px-1.5 leading-none text-center whitespace-nowrap align-baseline font-bold bg-red-500 text-white rounded-full text-xs">
-                                            {{ $unreadNotificationsCount }}
-                                        </span>
-                                    @endif
+                                @php $unreadNotificationsCount = Auth::user()->unreadNotifications()->count(); @endphp
+                                @if($unreadNotificationsCount > 0)
+                                    <span class="absolute -top-1 -right-2.5 ml-1 inline-block py-0.5 px-1.5 leading-none text-center whitespace-nowrap align-baseline font-bold bg-red-500 text-white rounded-full text-xs">
+                                        {{ $unreadNotificationsCount }}
+                                    </span>
+                                @endif
                             </a>
 
                             <form method="POST" action="{{ route('logout') }}" class="inline">
