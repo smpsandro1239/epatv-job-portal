@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\AreaOfInterest;
+use App\Models\Application;
+use App\Models\User;
 
 class Job extends Model
 {
+    use HasFactory;
+
     protected $table = 'jobs_employment';
     protected $fillable = [
         'title',
@@ -20,6 +26,10 @@ class Job extends Model
         'expiration_date',
     ];
 
+    protected $casts = [
+        'expiration_date' => 'date',
+    ];
+
     public function company()
     {
         return $this->belongsTo(User::class, 'company_id');
@@ -27,7 +37,7 @@ class Job extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class, 'category_id');
+        return $this->belongsTo(AreaOfInterest::class, 'category_id');
     }
 
     public function areaOfInterest()
@@ -38,5 +48,15 @@ class Job extends Model
     public function postedBy()
     {
         return $this->belongsTo(User::class, 'posted_by');
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class, 'job_id');
+    }
+
+    public function savedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'saved_jobs', 'job_id', 'user_id')->withTimestamps();
     }
 }
