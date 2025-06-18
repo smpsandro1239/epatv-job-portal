@@ -7,11 +7,30 @@
         {{-- Add any primary actions here if needed, e.g., "Create User" --}}
     </div>
 
+    {{-- Overall Statistics --}}
+    <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h3 class="text-lg font-semibold text-gray-600 mb-1">Total Users</h3>
+            <p class="text-3xl font-bold text-blue-600">{{ $stats['total_users_overall'] ?? 'N/A' }}</p>
+            <p class="text-xs text-gray-500 mt-1">Excluding Superadmins</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h3 class="text-lg font-semibold text-gray-600 mb-1">With CV</h3>
+            <p class="text-3xl font-bold text-green-600">{{ $stats['total_with_cv_overall'] ?? 'N/A' }}</p>
+            <p class="text-xs text-gray-500 mt-1">Users who have uploaded a CV</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h3 class="text-lg font-semibold text-gray-600 mb-1">Without CV</h3>
+            <p class="text-3xl font-bold text-yellow-500">{{ $stats['total_without_cv_overall'] ?? 'N/A' }}</p>
+            <p class="text-xs text-gray-500 mt-1">Users who have not uploaded a CV</p>
+        </div>
+    </div>
+
     {{-- Session messages are handled by layouts.app --}}
 
     <!-- Filter Form -->
     <form action="{{ route('admin.users.index') }}" method="GET" class="mb-10 p-6 bg-white shadow-lg rounded-lg border border-gray-200">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-end"> {{-- Adjusted grid columns --}}
             <div>
                 <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Filter by Role</label>
                 <select name="role" id="role"
@@ -32,6 +51,17 @@
                      @foreach($statuses as $statusValue) {{-- Assuming $statuses is passed from controller --}}
                         <option value="{{ $statusValue }}" {{ (isset($filters['registration_status']) && $filters['registration_status'] == $statusValue) ? 'selected' : '' }}>
                             {{ ucfirst($statusValue) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="filter_cv_status" class="block text-sm font-medium text-gray-700 mb-1">Filter by CV Status</label>
+                <select name="filter_cv_status" id="filter_cv_status"
+                        class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    @foreach($cvStatusOptions as $value => $label)
+                        <option value="{{ $value }}" {{ (isset($filters['filter_cv_status']) && $filters['filter_cv_status'] == $value) ? 'selected' : '' }}>
+                            {{ $label }}
                         </option>
                     @endforeach
                 </select>
@@ -64,7 +94,9 @@
                     <tr class="text-gray-700 uppercase text-sm leading-normal">
                         <th class="py-3 px-6 text-left">Name</th>
                         <th class="py-3 px-6 text-left">Email</th>
+                        <th class="py-3 px-6 text-left">Phone</th> <!-- New -->
                         <th class="py-3 px-6 text-left">Role</th>
+                        <th class="py-3 px-6 text-center">CV Status</th> <!-- New -->
                         <th class="py-3 px-6 text-center">Status</th>
                         <th class="py-3 px-6 text-center">Registered On</th>
                         <th class="py-3 px-6 text-center">Actions</th>
@@ -75,7 +107,15 @@
                         <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-150">
                             <td class="py-4 px-6 text-left whitespace-nowrap font-medium">{{ $user->name }}</td>
                             <td class="py-4 px-6 text-left">{{ $user->email }}</td>
+                            <td class="py-4 px-6 text-left">{{ $user->phone ?? 'N/A' }}</td> <!-- New -->
                             <td class="py-4 px-6 text-left">{{ ucfirst($user->role) }}</td>
+                            <td class="py-4 px-6 text-center"> <!-- New -->
+                                @if($user->cv)
+                                    <a href="{{ Storage::url($user->cv) }}" target="_blank" class="text-blue-500 hover:text-blue-700 hover:underline">View CV</a>
+                                @else
+                                    <span class="text-gray-400 italic">Not Available</span>
+                                @endif
+                            </td>
                             <td class="py-4 px-6 text-center">
                                 <span class="py-1 px-3 rounded-full text-xs font-semibold
                                     @if($user->registration_status == 'approved') bg-green-100 text-green-700 @endif
@@ -106,7 +146,7 @@
             </table>
         </div>
         <div class="mt-8">
-            {{ $users->appends(request()->query())->links() }}
+            {{ $users->appends(request()->query())->links() }} {{-- Ensure colspan is updated if "No users found" row uses it --}}
         </div>
     @endif
 </div>
