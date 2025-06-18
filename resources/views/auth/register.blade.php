@@ -87,7 +87,51 @@
                            class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     @error('company_name') <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p> @enderror
                 </div>
-                {{-- Add other company fields: company_city, company_website, company_description, company_logo --}}
+
+                {{-- Company City --}}
+                <div class="mb-4">
+                    <label for="company_city" class="block text-gray-700 text-sm font-bold mb-2">Cidade <span class="text-red-500">*</span></label>
+                    <input type="text" name="company_city" id="company_city" value="{{ old('company_city') }}"
+                           class="shadow appearance-none border @error('company_city') border-red-500 @enderror rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ex: Braga">
+                    @error('company_city') <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Company Website --}}
+                <div class="mb-4">
+                    <label for="company_website" class="block text-gray-700 text-sm font-bold mb-2">Site da empresa (opcional)</label>
+                    <input type="url" name="company_website" id="company_website" value="{{ old('company_website') }}"
+                           class="shadow appearance-none border @error('company_website') border-red-500 @enderror rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="https://www.asuaempresa.com">
+                    @error('company_website') <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Contact Phone --}}
+                <div class="mb-4">
+                    <label for="phone" class="block text-gray-700 text-sm font-bold mb-2">Telefone (Contacto) <span class="text-red-500">*</span></label>
+                    <input type="tel" name="phone" id="phone" value="{{ old('phone') }}"
+                           class="shadow appearance-none border @error('phone') border-red-500 @enderror rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ex: 912345678">
+                    @error('phone') <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Company Description --}}
+                <div class="mb-4">
+                    <label for="company_description" class="block text-gray-700 text-sm font-bold mb-2">Descrição da empresa</label>
+                    <textarea name="company_description" id="company_description" rows="4"
+                              class="shadow appearance-none border @error('company_description') border-red-500 @enderror rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Fale um pouco sobre a sua empresa: Qual é a essência da sua empresa, qual a sua missão, o caminho para o crescimento profissional, os incentivos motivacionais e as vantagens oferecidas aos colaboradores?">{{ old('company_description') }}</textarea>
+                    @error('company_description') <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Company Logo --}}
+                <div class="mb-4">
+                    <label for="company_logo" class="block text-gray-700 text-sm font-bold mb-2">Logótipo da empresa (opcional)</label>
+                    <input type="file" name="company_logo" id="company_logo"
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 @error('company_logo') border-red-500 @enderror">
+                    <p class="text-xs text-gray-500 mt-1">Maximum file size: 2 MB.</p>
+                    @error('company_logo') <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p> @enderror
+                </div>
             </div>
 
             {{-- For Student --}}
@@ -98,6 +142,14 @@
                            class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            min="1980" max="{{ date('Y') + 5 }}">
                     @error('course_completion_year') <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p> @enderror
+                </div>
+                {{-- Student Phone --}}
+                <div class="mb-4">
+                    <label for="student_phone" class="block text-gray-700 text-sm font-bold mb-2">Telefone (Opcional)</label>
+                    <input type="tel" name="phone" id="student_phone" value="{{ old('phone') }}"
+                           class="shadow appearance-none border @error('phone') border-red-500 @enderror rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ex: 912345678">
+                    @error('phone') <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p> @enderror
                 </div>
                  <div class="mb-4">
                     <label for="window_password" class="block text-gray-700 text-sm font-bold mb-2">Registration Window Password (if applicable)</label>
