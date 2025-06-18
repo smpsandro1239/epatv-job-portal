@@ -14,7 +14,17 @@
         use HasFactory;
 
         protected $table = 'applications';
-        protected $fillable = ['user_id', 'job_id', 'status', 'cover_letter'];
+        protected $fillable = [
+            'user_id',
+            'job_id',
+            'status',
+            'name',
+            'email',
+            'phone',
+            'course_completion_year',
+            'cv_path',
+            'message', // Renamed from cover_letter
+        ];
 
         public function user()
         {

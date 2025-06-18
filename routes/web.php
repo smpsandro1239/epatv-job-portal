@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\StudentController; // Added import
 use App\Http\Controllers\JobController; // Added import
 use App\Http\Controllers\EmployerController; // Added import for Employer Web Controller
+use App\Http\Controllers\ApplicationController; // Added import
 
 Route::view('/', 'welcome')->name('home');
 Route::view('/login', 'auth.login')->name('login');
@@ -26,6 +27,10 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/student/profile/edit', [StudentController::class, 'edit'])->name('student.profile.edit');
     Route::put('/student/profile', [StudentController::class, 'update'])->name('student.profile.update');
     Route::get('/student/applications', [StudentController::class, 'listApplications'])->name('student.applications.index');
+
+    // Job Application Routes for Students
+    Route::get('/jobs/{job}/apply', [ApplicationController::class, 'create'])->name('jobs.application.create');
+    Route::post('/jobs/{job}/apply', [ApplicationController::class, 'store'])->name('jobs.application.store');
 });
 
 // Employer Profile Web Routes
