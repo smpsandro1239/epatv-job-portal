@@ -30,8 +30,8 @@ class AuthController extends Controller
         'name' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users',
         'password' => 'required|string|min:8|confirmed',
-        'role' => 'required|in:candidate,employer,admin,superadmin',
-        'window_password' => 'required_if:role,candidate',
+        'role' => 'required|in:student,employer,admin,superadmin',
+        'window_password' => 'required_if:role,student', // Changed candidate to student
         'phone' => 'nullable|string|max:20',
         'course_completion_year' => 'nullable|integer|min:1900|max:' . date('Y'),
         // Company fields - company_name becomes required if role is employer
@@ -53,7 +53,7 @@ class AuthController extends Controller
         ->first();
 
       $status = 'approved';
-      if ($request->role === 'candidate') {
+      if ($request->role === 'student') { // Changed candidate to student
         $isValidWindow = $window && $window->current_registrations < $window->max_registrations;
         $isValidPassword = $window && Hash::check($request->window_password, $window->password) && now()->diffInHours($window->first_use_time) < 2;
 

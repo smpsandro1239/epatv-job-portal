@@ -31,7 +31,12 @@ class ApplicationFactory extends Factory
             'user_id' => $userId,
             'job_id' => $jobId,
             'status' => $this->faker->randomElement(['pending', 'reviewed', 'shortlisted', 'rejected', 'hired']),
-            'cover_letter' => $this->faker->optional()->paragraph, // Cover letter is nullable
+            'name' => $this->faker->name(),
+            'email' => $this->faker->email(),
+            'phone' => $this->faker->phoneNumber(),
+            'course_completion_year' => $this->faker->optional()->year(),
+            'cv_path' => $this->faker->optional()->filePath(),
+            'message' => $this->faker->optional()->paragraph,
             'created_at' => now(),
             'updated_at' => now(),
         ];

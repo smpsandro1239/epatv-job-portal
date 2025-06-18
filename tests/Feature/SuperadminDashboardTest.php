@@ -51,7 +51,7 @@ class SuperadminDashboardTest extends TestCase
         return Job::factory()->create($attributes);
     }
 
-    private function createApplication(User $student, Job $job, array $attributes = []): Application
+    public function createTestApplication(User $student, Job $job, array $attributes = []): Application
     {
         return Application::factory()->create(array_merge([
             'user_id' => $student->id,
@@ -96,8 +96,8 @@ class SuperadminDashboardTest extends TestCase
         $job1 = Job::first();
         $student1 = User::where('role', 'student')->first();
         if ($job1 && $student1) {
-            $this->createApplication($student1, $job1);
-            $this->createApplication($this->createStudent(['email' => 'another@student.com']), $job1); // 2 apps for job1
+            $this->createTestApplication($student1, $job1);
+            $this->createTestApplication($this->createStudent(['email' => 'another@student.com']), $job1); // 2 apps for job1
         }
     }
 

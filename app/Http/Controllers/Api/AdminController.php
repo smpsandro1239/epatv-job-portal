@@ -7,10 +7,6 @@ use App\Models\User;
 use App\Models\Job;
 use App\Models\Application; // Added
 use App\Models\AreaOfInterest; // Added
-use App\Models\User;
-use App\Models\Job;
-use App\Models\Application;
-use App\Models\AreaOfInterest;
 use App\Models\RegistrationWindow;
 use App\Models\Notification as DbNotification; // Added DbNotification
 use Illuminate\Http\Request;

@@ -40,17 +40,40 @@ class ApplicationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'job_id' => 'required|exists:jobs_employment,id',
-            'cover_letter' => 'nullable|string',
+            'message' => 'nullable|string', // Changed from cover_letter
         ]);
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
+
+        $user = auth('api')->user();
+
+        // Ensure user is found and is a student
+        if (!$user || ($user->role !== 'student' && $user->role !== 'candidate')) {
+            return response()->json(['message' => 'Unauthorized or invalid user role.'], 403);
+        }
+
+        // Check if already applied
+        $hasApplied = Application::where('user_id', $user->id)
+                                ->where('job_id', $request->job_id)
+                                ->exists();
+        if ($hasApplied) {
+            return response()->json(['message' => 'You have already applied for this job.'], 409); // 409 Conflict
+        }
+
         $application = Application::create([
-            'user_id' => auth('api')->id(),
+            'user_id' => $user->id,
             'job_id' => $request->job_id,
             'status' => 'pending',
-            'cover_letter' => $request->cover_letter,
+            'name' => $user->name, // Populate from authenticated user
+            'email' => $user->email, // Populate from authenticated user
+            'phone' => $user->phone, // Populate from authenticated user (ensure User model has phone)
+            'course_completion_year' => $user->course_completion_year, // (ensure User model has this)
+            'cv_path' => $user->cv, // Populate from authenticated user (ensure User model has cv)
+            'message' => $request->message, // Changed from cover_letter
         ]);
+
         return response()->json([
             'message' => 'Application submitted successfully',
             'application' => $application

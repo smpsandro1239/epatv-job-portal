@@ -9,33 +9,23 @@ class UpdateRegistrationWindowsTable extends Migration
     public function up()
     {
         Schema::table('registration_windows', function (Blueprint $table) {
-            // Remover colunas antigas
-            $table->dropColumn(['start_date', 'end_date']);
-            // Adicionar colunas corretas
-            $table->boolean('is_active')->default(false)->after('id');
-            $table->dateTime('start_time')->nullable()->after('is_active');
-            $table->dateTime('end_time')->nullable()->after('start_time');
-            $table->integer('max_registrations')->default(30)->after('end_time');
-            $table->string('password')->nullable()->after('max_registrations');
-            $table->dateTime('first_use_time')->nullable()->after('password');
-            $table->integer('current_registrations')->default(0)->after('first_use_time');
+            // Remover colunas antigas that were added by 2025_05_26_152017_add_dates_to_registration_windows_table.php
+            if (Schema::hasColumn('registration_windows', 'start_date') && Schema::hasColumn('registration_windows', 'end_date')) {
+                $table->dropColumn(['start_date', 'end_date']);
+            }
         });
     }
 
     public function down()
     {
         Schema::table('registration_windows', function (Blueprint $table) {
-            $table->dropColumn([
-                'is_active',
-                'start_time',
-                'end_time',
-                'max_registrations',
-                'password',
-                'first_use_time',
-                'current_registrations',
-            ]);
-            $table->dateTime('start_date')->after('id');
-            $table->dateTime('end_date')->after('start_date');
+            // Re-add the columns if they don't exist, to revert the 'up' operation
+            if (!Schema::hasColumn('registration_windows', 'start_date')) {
+                $table->dateTime('start_date')->after('id')->nullable(); // Assuming it can be nullable or set a default
+            }
+            if (!Schema::hasColumn('registration_windows', 'end_date')) {
+                $table->dateTime('end_date')->after('start_date')->nullable(); // Assuming it can be nullable or set a default
+            }
         });
     }
 }
