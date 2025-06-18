@@ -11,15 +11,22 @@ class JobFactory extends Factory
   public function definition(): array
   {
     $companyId = User::factory()->create(['role' => 'employer'])->id;
-    $areaOfInterestId = AreaOfInterest::inRandomOrder()->first()?->id ?? AreaOfInterest::factory()->create()->id;
+
+    // Ensure AreaOfInterest exists, or create one.
+    $areaOfInterest = AreaOfInterest::inRandomOrder()->first();
+    if (!$areaOfInterest) {
+        $areaOfInterest = AreaOfInterest::factory()->create();
+    }
+    $areaOfInterestId = $areaOfInterest->id;
+
+    // Ensure a category_id is always set. This assumes category_id refers to an AreaOfInterest.
+    // If it's a different table, this logic would need adjustment.
+    $categoryId = $areaOfInterestId; // Default to the same as area_of_interest_id for simplicity
 
     return [
       'company_id' => $companyId,
       'title' => $this->faker->jobTitle,
-      // Both category_id and area_of_interest_id point to areas_of_interest table.
-      // Setting them to potentially different areas or the same for simplicity.
-      // If category_id has a distinct meaning (e.g. broader category), adjust as needed.
-      'category_id' => AreaOfInterest::inRandomOrder()->first()?->id ?? AreaOfInterest::factory()->create()->id,
+      'category_id' => $categoryId, // Ensure this is always set
       'area_of_interest_id' => $areaOfInterestId,
       'description' => $this->faker->paragraph,
       'location' => $this->faker->city,

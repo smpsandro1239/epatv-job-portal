@@ -7,13 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
-    use HasFactory; // Assuming you might want to use factories later
+    use HasFactory;
+
+    // This model now aligns with Laravel's default notifications table structure
+    protected $primaryKey = 'id'; // Standard Laravel notifications table uses 'id' as primary
+    public $incrementing = false; // Since 'id' is UUID
+    protected $keyType = 'string'; // Since 'id' is UUID
 
     protected $fillable = [
-        'user_id', // The user who will receive the notification
-        'type',    // Could be the class name of a Laravel Notification, or a custom string
-        'data',    // JSON column to store notification-specific data
-        'read_at', // Timestamp when the notification was read by the user
+        'id',
+        'type',
+        'notifiable_type',
+        'notifiable_id',
+        'data',
+        'read_at',
     ];
 
     protected $casts = [
@@ -22,10 +29,10 @@ class Notification extends Model
     ];
 
     /**
-     * Get the user that the notification belongs to.
+     * Get the notifiable entity that the notification belongs to.
      */
-    public function user()
+    public function notifiable()
     {
-        return $this->belongsTo(User::class);
+        return $this->morphTo();
     }
 }

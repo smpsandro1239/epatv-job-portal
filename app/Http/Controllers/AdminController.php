@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str; // Added for Str::uuid()
 
 class AdminController extends Controller
 {
@@ -45,12 +46,14 @@ class AdminController extends Controller
         // For filter dropdowns - get distinct roles and statuses present in the users table (excluding superadmin)
         $roles = User::where('role', '!=', 'superadmin')->distinct()->pluck('role');
         $statuses = User::where('role', '!=', 'superadmin')->distinct()->pluck('registration_status');
+        $cvStatusOptions = ['Available' => 'Available', 'Not Available' => 'Not Available']; // Default options
 
 
         return view('admin.users.index', [
             'users' => $users,
             'roles' => $roles,
             'statuses' => $statuses,
+            'cvStatusOptions' => $cvStatusOptions, // Added
             'filters' => $request->all(), // Pass current filters to the view
         ]);
     }
@@ -77,9 +80,12 @@ class AdminController extends Controller
 
         // Create a database notification for the approved student
         DbNotification::create([
-            'user_id' => $user->id,
-            'type' => 'RegistrationApprovedNotification', // Custom type string
-            'data' => ['message' => 'Congratulations! Your registration has been approved. You can now log in and access all student features.']
+            'id' => Str::uuid(),
+            'notifiable_id' => $user->id,
+            'notifiable_type' => User::class, // Or get_class($user)
+            'type' => 'App\\Notifications\\RegistrationApprovedNotification', // More standard to use class name
+            'data' => json_encode(['message' => 'Congratulations! Your registration has been approved. You can now log in and access all student features.']),
+            'read_at' => null,
         ]);
 
         // TODO: Dispatch Laravel Email Notification if needed (e.g., using App\Notifications\RegistrationApprovedNotification)
@@ -191,7 +197,7 @@ class AdminController extends Controller
                                  ->select('areas_of_interest.name as area_name', DB::raw('count(jobs_employment.id) as total'))
                                  ->groupBy('areas_of_interest.name')->orderBy('total', 'desc')->get(),
 
-            'jobs_by_month' => Job::select(DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), DB::raw('count(*) as total'))
+            'jobs_by_month' => Job::select(DB::raw("strftime('%Y-%m', created_at) as month"), DB::raw('count(*) as total'))
                                   ->groupBy('month')->orderBy('month', 'asc')->get(),
 
             'jobs_by_contract_type_all' => Job::select('contract_type', DB::raw('count(*) as total'))

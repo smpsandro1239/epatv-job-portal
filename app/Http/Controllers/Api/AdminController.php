@@ -12,6 +12,9 @@ use App\Models\Notification as DbNotification; // Added DbNotification
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification; // For Laravel's email notifications
+use Illuminate\Support\Facades\Auth; // Added for Auth facade
+use Illuminate\Support\Facades\Validator; // Added for Validator facade
+use Illuminate\Support\Str; // Added for Str::uuid()
 // use App\Notifications\RegistrationApprovedNotification; // This would be for Laravel's email notifications
 
 class AdminController extends Controller
@@ -48,7 +51,7 @@ class AdminController extends Controller
                                  ->groupBy('areas_of_interest.name')->orderBy('total', 'desc')->take(5)->get(),
 
             // Job Postings by Month
-            'jobs_by_month' => Job::select(DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), DB::raw('count(*) as total'))
+            'jobs_by_month' => Job::select(DB::raw("strftime('%Y-%m', created_at) as month"), DB::raw('count(*) as total'))
                                   ->groupBy('month')->orderBy('month', 'asc')->get(),
 
             // Job Postings by Contract Type
@@ -112,9 +115,12 @@ class AdminController extends Controller
 
         // Create a database notification for the approved student
         DbNotification::create([
-            'user_id' => $user->id,
-            'type' => 'RegistrationApprovedNotification', // Custom type string
-            'data' => ['message' => 'Congratulations! Your registration has been approved. You can now log in and access all student features.']
+            'id' => Str::uuid(),
+            'notifiable_id' => $user->id,
+            'notifiable_type' => User::class, // Or get_class($user)
+            'type' => 'App\\Notifications\\RegistrationApprovedNotification', // More standard to use class name
+            'data' => json_encode(['message' => 'Congratulations! Your registration has been approved. You can now log in and access all student features.']),
+            'read_at' => null,
         ]);
 
         // If Laravel's built-in email notifications are also desired for this:

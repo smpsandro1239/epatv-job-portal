@@ -18,7 +18,7 @@
                 <div class="flex justify-between items-center py-4">
                     <a href="{{ route('home') }}" class="text-xl font-bold">{{ config('app.name', 'Job Portal') }}</a>
 
-                    <div class="flex items-center space-x-4"> <!-- Simplified this div -->
+                    <div class="flex items-center">
                         <a href="{{ route('jobs.index') }}" class="px-2 py-1 hover:text-blue-200 rounded-md">Jobs</a>
 
                         @guest
