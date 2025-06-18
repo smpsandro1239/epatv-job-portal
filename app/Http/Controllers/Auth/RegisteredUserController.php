@@ -39,14 +39,16 @@ class RegisteredUserController extends Controller
             $conditionalRules = [
                 'course_completion_year' => ['nullable', 'integer', 'min:1980', 'max:' . (date('Y') + 7)],
                 'window_password' => ['nullable', 'string'], // Further validation if window requires it
+                'phone' => ['nullable', 'string', 'max:20'], // Added phone for student
             ];
         } elseif ($currentRole === 'employer') {
             $conditionalRules = [
                 'company_name' => ['required', 'string', 'max:255'],
-                'company_city' => ['nullable', 'string', 'max:255'],
+                'company_city' => ['required', 'string', 'max:255'], // Changed to required
                 'company_website' => ['nullable', 'url', 'max:255'],
                 'company_description' => ['nullable', 'string'],
                 'company_logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+                'phone' => ['required', 'string', 'max:20'], // Added phone
             ];
         }
 
@@ -120,12 +122,14 @@ class RegisteredUserController extends Controller
 
         if ($validatedData['role'] === 'student') {
             $userData['course_completion_year'] = $validatedData['course_completion_year'] ?? null;
+            $userData['phone'] = $validatedData['phone'] ?? null; // Added phone for student
             // window_password is not stored on user model
         } elseif ($validatedData['role'] === 'employer') {
             $userData['company_name'] = $validatedData['company_name'];
-            $userData['company_city'] = $validatedData['company_city'] ?? null;
+            $userData['company_city'] = $validatedData['company_city']; // No longer nullable in validation for employer
             $userData['company_website'] = $validatedData['company_website'] ?? null;
             $userData['company_description'] = $validatedData['company_description'] ?? null;
+            $userData['phone'] = $validatedData['phone']; // Added phone
 
             if ($request->hasFile('company_logo')) {
                 $path = $request->file('company_logo')->store('public/company_logos');

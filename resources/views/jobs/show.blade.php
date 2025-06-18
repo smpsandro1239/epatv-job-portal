@@ -54,11 +54,11 @@
                 @auth
                     @if(Auth::user()->role === 'student')
                         <div class="mt-10 pt-6 border-t">
-                            {{-- Apply Now Button - Placeholder for API interaction or form --}}
-                            <button onclick="handleApplyNow({{ $job->id }})"
-                                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-md hover:shadow-lg transition duration-150 mr-4">
+                            {{-- Apply Now Button - Updated to link to the application form --}}
+                            <a href="{{ route('jobs.application.create', $job) }}"
+                               class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-md hover:shadow-lg transition duration-150 mr-4">
                                 Apply Now
-                            </button>
+                            </a>
 
                             {{-- Save Job Button - Placeholder for API interaction --}}
                             <button id="saveJobBtn" onclick="toggleSaveJob({{ $job->id }})"
@@ -124,39 +124,8 @@
 
 @push('scripts')
 <script>
-// Placeholder for API interactions
-function handleApplyNow(jobId) {
-    @auth
-        @if(Auth::user()->role === 'student')
-            // Logic to initiate application, perhaps redirect to a form or use API
-            // For now, let's assume an API call might be made or a modal shown
-            // Example: check if student has CV/profile complete before applying
-            alert('Apply Now clicked for Job ID: ' + jobId + '. This would ideally trigger an API call or a dedicated application form.');
-            // Example API call structure (requires an endpoint like /api/student/applications)
-            /*
-            fetch('/api/apply', { // Assuming this is the endpoint from ApplicationController
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // If using web session for API
-                    'Authorization': 'Bearer your_api_token_here' // If using JWT
-                },
-                body: JSON.stringify({ job_id: jobId, cover_letter: 'Optional cover letter here...' })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.message) alert(data.message);
-                // Potentially update UI, e.g., change button to "Applied"
-            })
-            .catch(error => console.error('Error applying:', error));
-            */
-        @else
-            alert('Only students can apply for jobs.');
-        @endif
-    @else
-        window.location.href = "{{ route('login', ['redirect' => url()->current()]) }}";
-    @endauth
-}
+// The handleApplyNow function is no longer needed as the button is now a direct link.
+// It can be removed or commented out. For this operation, we will remove it.
 
 function toggleSaveJob(jobId) {
     @auth
