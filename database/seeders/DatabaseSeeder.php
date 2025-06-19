@@ -9,27 +9,24 @@ use App\Models\Job;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
         // Admin User
-        if (!User::where('email', 'test@example.com')->exists()) {
-            $adminUser = User::create([
+        $adminUser = User::updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
                 'name' => 'Test Admin',
-                'email' => 'test@example.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
-                'remember_token' => \Illuminate\Support\Str::random(10),
+                'remember_token' => Str::random(10),
                 'role' => 'admin',
                 'registration_status' => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } else {
-            $adminUser = User::where('email', 'test@example.com')->first();
-        }
+            ]
+        );
 
         // Superadmin User
         if (!User::where('email', 'admin@epatv.pt')->exists()) {
@@ -46,20 +43,16 @@ class DatabaseSeeder extends Seeder
         }
 
         // Employer User
-        if (!User::where('email', 'employer@example.com')->exists()) {
-            $employer = User::create([
+        $employer = User::updateOrCreate(
+            ['email' => 'employer@example.com'],
+            [
                 'name' => 'Test Employer',
-                'email' => 'employer@example.com',
                 'password' => Hash::make('password'),
                 'role' => 'employer',
                 'registration_status' => 'approved',
                 'email_verified_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } else {
-            $employer = User::where('email', 'employer@example.com')->first();
-        }
+            ]
+        );
 
         // Areas of Interest
         $areas = [
