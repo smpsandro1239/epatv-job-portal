@@ -13,6 +13,9 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
     ->middleware('signed')
     ->name('verification.verify');
+
+Route::get('/jobs/active-count', [App\Http\Controllers\Api\JobController::class, 'activeCount'])->name('api.jobs.active_count');
+
 // Route::middleware(['auth:api', 'role:admin,superadmin'])->group(function () {
     // Route::get('/admin/dashboard', [AdminController::class, 'dashboard']); // Moved to superadmin group
     // Note: Original task asked for superadmin only for user management.
