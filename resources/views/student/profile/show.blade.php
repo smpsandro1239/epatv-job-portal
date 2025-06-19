@@ -70,6 +70,28 @@
                         </div>
                     </div>
 
+                    <!-- My Activity Section -->
+                    <div class="mt-8 mb-6 border-t pt-6">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">My Activity</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Submitted Applications</label>
+                                <p class="text-2xl font-bold text-blue-600">{{ $myApplicationsCount }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Active Jobs in Your Preferred Areas</label>
+                                <p class="text-2xl font-bold text-green-600">{{ $jobsInPreferredAreasCount }}</p>
+                                @if($user->areasOfInterest->isEmpty() && $jobsInPreferredAreasCount === 0)
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <a href="{{ route('student.profile.edit') }}#areas-of-interest-section" class="text-blue-500 hover:underline">Set your preferred areas</a> to see relevant jobs here.
+                                </p>
+                                @elseif($jobsInPreferredAreasCount === 0 && $user->areasOfInterest->isNotEmpty())
+                                    <p class="text-xs text-gray-500 mt-1">No active jobs currently match your preferred areas.</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-6">
                         <h3 class="text-xl font-semibold text-gray-700 mb-3">Areas of Interest</h3>
                         @if($user->areasOfInterest->isNotEmpty())

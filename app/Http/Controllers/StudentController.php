@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Application; // Added import
 use App\Models\AreaOfInterest;
+use App\Models\Job; // Added import for Job model
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon; // Added import for Carbon
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator; // Added for Validator
 
@@ -12,6 +15,7 @@ class StudentController extends Controller
 {
     /**
      * Display the authenticated student's profile.
+     * This will also serve as a basic dashboard by including application count.
      */
     public function show()
     {
@@ -20,7 +24,25 @@ class StudentController extends Controller
             abort(403, 'Unauthorized action.');
         }
         $user->load('areasOfInterest');
-        return view('student.profile.show', compact('user'));
+
+        // Get the count of applications for the authenticated student
+        $myApplicationsCount = Application::where('user_id', $user->id)->count();
+
+        // Get count of active jobs in student's preferred areas of interest
+        $jobsInPreferredAreasCount = 0;
+        $preferredAreaIds = $user->areasOfInterest->pluck('id')->toArray();
+
+        if (!empty($preferredAreaIds)) {
+            $now = Carbon::now();
+            $jobsInPreferredAreasCount = Job::whereIn('area_of_interest_id', $preferredAreaIds)
+                ->where(function ($query) use ($now) {
+                    $query->where('expiration_date', '>', $now)
+                          ->orWhereNull('expiration_date');
+                })
+                ->count();
+        }
+
+        return view('student.profile.show', compact('user', 'myApplicationsCount', 'jobsInPreferredAreasCount'));
     }
 
     /**
