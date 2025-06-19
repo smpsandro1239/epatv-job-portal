@@ -11,6 +11,11 @@ use App\Http\Controllers\ApplicationController; // Added import
 Route::view('/', 'welcome')->name('home');
 Route::view('/login', 'auth.login')->name('login');
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+
+// New registration routes for student and company
+Route::get('/register/student', [RegisteredUserController::class, 'createWithType'])->name('register.student')->defaults('type', 'student');
+Route::get('/register/company', [RegisteredUserController::class, 'createWithType'])->name('register.company')->defaults('type', 'company');
+
 Route::view('/register', 'auth.register')->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.store');
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
