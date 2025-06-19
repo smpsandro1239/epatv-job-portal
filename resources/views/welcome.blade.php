@@ -17,9 +17,13 @@
                     Browse Jobs
                 </a>
                 @guest
-                <a href="{{ route('register') }}"
-                   class="bg-white hover:bg-gray-100 text-blue-600 font-bold py-3 px-8 rounded-lg text-lg shadow-lg transform hover:scale-105 transition duration-300">
-                    Sign Up Now
+                <a href="{{ url('register/student') }}"
+                   class="bg-green-400 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-lg transform hover:scale-105 transition duration-300">
+                    Sou Aluno Registar
+                </a>
+                <a href="{{ url('register/company') }}"
+                   class="bg-purple-400 hover:bg-purple-500 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-lg transform hover:scale-105 transition duration-300">
+                    Sou Empresa Registar
                 </a>
                 @endguest
                 @auth
