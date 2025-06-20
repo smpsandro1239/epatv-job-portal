@@ -183,11 +183,19 @@ class AdminController extends Controller
 
         $stats = [
             'total_users' => User::where('role', '!=', 'superadmin')->count(),
-            'total_jobs' => Job::count(),
+            'total_jobs' => Job::count(), // Matches "Jobs Posted"
             'pending_registrations' => User::where('registration_status', 'pending')->where('role', '!=', 'superadmin')->count(),
-            'students_count' => User::whereIn('role', ['candidate', 'student'])->count(),
-            'employers_count' => User::whereIn('role', ['employer', 'admin'])->where('role', '!=', 'superadmin')->count(),
-            'students_with_cv_count' => User::whereIn('role', ['candidate', 'student'])->whereNotNull('cv')->count(),
+
+            // Specific counts as per new requirements
+            'active_job_seekers_count' => User::where('role', 'student')->count(),
+            'active_employers_count' => User::where('role', 'employer')->count(),
+            'student_profiles_completed_count' => User::where('role', 'student')->whereNotNull('cv')->where('cv', '!=', '')->count(),
+            'total_applications' => Application::count(), // Matches "Applications Sent"
+
+            // Existing broader counts (can be kept or removed if redundant)
+            'broader_students_count' => User::whereIn('role', ['candidate', 'student'])->count(),
+            'broader_employers_count' => User::whereIn('role', ['employer', 'admin'])->where('role', '!=', 'superadmin')->count(),
+            'broader_students_with_cv_count' => User::whereIn('role', ['candidate', 'student'])->whereNotNull('cv')->count(),
 
             'jobs_by_location_all' => Job::select('location', DB::raw('count(*) as total'))
                                      ->whereNotNull('location')->where('location', '!=', '')
@@ -197,14 +205,16 @@ class AdminController extends Controller
                                  ->select('areas_of_interest.name as area_name', DB::raw('count(jobs_employment.id) as total'))
                                  ->groupBy('areas_of_interest.name')->orderBy('total', 'desc')->get(),
 
-            'jobs_by_month' => Job::select(DB::raw("strftime('%Y-%m', created_at) as month"), DB::raw('count(*) as total'))
+
+
+            'jobs_by_month' => Job::select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"), DB::raw('count(*) as total'))
+
                                   ->groupBy('month')->orderBy('month', 'asc')->get(),
 
             'jobs_by_contract_type_all' => Job::select('contract_type', DB::raw('count(*) as total'))
                                          ->whereNotNull('contract_type')->where('contract_type', '!=', '')
                                          ->groupBy('contract_type')->orderBy('total', 'desc')->get(),
-
-            'total_applications' => Application::count(),
+            // 'total_applications' is already defined above
         ];
 
         // Prepare top 5 for quick display, and all for charts if needed differently

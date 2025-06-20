@@ -10,15 +10,20 @@
             <p class="text-xl text-blue-100 mb-12 max-w-2xl mx-auto">
                 Connecting talented students and graduates with exciting opportunities from leading employers. Your next career move starts here.
             </p>
+            <p class="text-lg text-blue-200 mt-4 mb-8"><span id="active-job-count-placeholder">Loading...</span> vagas disponíveis!</p>
             <div class="space-x-4">
                 <a href="{{ route('jobs.index') }}"
                    class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg shadow-lg transform hover:scale-105 transition duration-300">
                     Browse Jobs
                 </a>
                 @guest
-                <a href="{{ route('register') }}"
-                   class="bg-white hover:bg-gray-100 text-blue-600 font-bold py-3 px-8 rounded-lg text-lg shadow-lg transform hover:scale-105 transition duration-300">
-                    Sign Up Now
+                <a href="{{ url('register/student') }}"
+                   class="bg-green-400 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-lg transform hover:scale-105 transition duration-300">
+                    Sou Aluno Registar
+                </a>
+                <a href="{{ url('register/company') }}"
+                   class="bg-purple-400 hover:bg-purple-500 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-lg transform hover:scale-105 transition duration-300">
+                    Sou Empresa Registar
                 </a>
                 @endguest
                 @auth
@@ -70,3 +75,32 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/jobs/active-count')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const countElement = document.getElementById('active-job-count-placeholder');
+                if (countElement && data.active_job_count !== undefined) {
+                    countElement.textContent = data.active_job_count;
+                } else if (countElement) {
+                    countElement.textContent = 'N/A';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching active job count:', error);
+                const countElement = document.getElementById('active-job-count-placeholder');
+                if (countElement) {
+                    countElement.textContent = '-'; // Or some other error indicator
+                }
+            });
+    });
+</script>
+@endpush
