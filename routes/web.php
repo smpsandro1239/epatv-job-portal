@@ -47,7 +47,7 @@ Route::middleware(['auth', 'role:employer'])->group(function () {
 
 // Employer Job Management Web Routes
 Route::middleware(['auth', 'role:employer'])->group(function () {
-    Route::resource('/employer/jobs', \App\Http\Controllers\EmployerJobController::class);
+    Route::resource('/employer/jobs', \App\Http\Controllers\EmployerJobController::class)->names('employer.jobs');
     // Note: If EmployerJobController was not in App\Http\Controllers, the FQCN would be needed.
     // For this project, it's assumed to be in the default Controllers namespace.
 
