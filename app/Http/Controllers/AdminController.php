@@ -207,8 +207,7 @@ class AdminController extends Controller
 
 
 
-            'jobs_by_month' => Job::select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"), DB::raw('count(*) as total'))
-
+            'jobs_by_month' => Job::select(DB::raw("strftime('%Y-%m', created_at) as month"), DB::raw('count(*) as total'))
                                   ->groupBy('month')->orderBy('month', 'asc')->get(),
 
             'jobs_by_contract_type_all' => Job::select('contract_type', DB::raw('count(*) as total'))
