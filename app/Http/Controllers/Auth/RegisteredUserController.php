@@ -9,6 +9,7 @@ use App\Models\Notification as DbNotification; // Use an alias
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse; // Changed from Response
+use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +19,15 @@ use Illuminate\Validation\Rule; // For Rule::in
 
 class RegisteredUserController extends Controller
 {
+    /**
+     * Display the registration view with a specific type (student/employer).
+     */
+    public function createWithType(Request $request): View
+    {
+        $type = $request->route('type'); // 'student' or 'company' from route defaults
+        return view('auth.register', ['type' => $type]);
+    }
+
     /**
      * Handle an incoming registration request.
      *
@@ -55,7 +65,13 @@ class RegisteredUserController extends Controller
         $validator = Validator::make($request->all(), array_merge($baseRules, $conditionalRules));
 
         if ($validator->fails()) {
-            return redirect('register') // Or back()
+            $redirectUrl = route('register'); // Default fallback
+            if ($request->input('role') === 'student') {
+                $redirectUrl = route('register.student');
+            } elseif ($request->input('role') === 'employer') {
+                $redirectUrl = route('register.company');
+            }
+            return redirect($redirectUrl)
                         ->withErrors($validator)
                         ->withInput();
         }
