@@ -3,6 +3,9 @@
 namespace Tests\Feature\Auth;
 
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 test('new users can register', function () {
     // Ensure an active registration window with a known password exists
