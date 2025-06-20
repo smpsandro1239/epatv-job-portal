@@ -75,3 +75,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markallasread');
 });
+
+require __DIR__.'/auth.php';
+
+// Profile routes
+use App\Http\Controllers\Auth\ProfileController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit'); // Added for viewing the profile form
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update'); // Renamed for clarity
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});

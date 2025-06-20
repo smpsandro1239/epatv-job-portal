@@ -25,7 +25,7 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])
     ->name('password.store');
 
 Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)
-    ->middleware(['auth', 'signed', 'throttle:6,1'])
+    ->middleware(['signed', 'throttle:6,1']) // Removed 'auth' middleware
     ->name('verification.verify');
 
 Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
@@ -35,3 +35,10 @@ Route::post('/email/verification-notification', [EmailVerificationNotificationCo
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+Route::get('/confirm-password', [\App\Http\Controllers\Auth\ConfirmablePasswordController::class, 'show'])
+    ->middleware('auth')
+    ->name('password.confirm');
+
+Route::post('/confirm-password', [\App\Http\Controllers\Auth\ConfirmablePasswordController::class, 'store'])
+    ->middleware('auth');
