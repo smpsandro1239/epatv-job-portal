@@ -3,39 +3,55 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
+// No Event or Notification faking/assertions needed for these specific instructions
 
-test('email can be verified', function () {
-    Notification::fake();
-    $user = User::factory()->create(['email_verified_at' => null]);
+class EmailVerificationTest extends TestCase
+{
+    use RefreshDatabase;
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1($user->email)]
-    );
+    public function test_email_can_be_verified(): void
+    {
+        $user = User::factory()->create(['email_verified_at' => null]);
 
-    $response = $this->actingAs($user, 'api')->getJson($verificationUrl);
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1($user->getEmailForVerification())]
+        );
 
-    $response->assertOk();
-    expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    Notification::assertSentTo($user, VerifyEmail::class);
-});
+        // Request without actingAs, expecting JSON response
+        $response = $this->getJson($verificationUrl);
 
-test('email verification fails with invalid hash', function () {
-    $user = User::factory()->create(['email_verified_at' => null]);
+        // As per instruction, assertOk(). This implies the controller
+        // should handle this scenario and return a 200 JSON response
+        // if an unauthenticated user tries to verify with a valid link.
+        // This is different from typical web flow which redirects.
+        // The actual controller 'VerifyEmailController' redirects.
+        // This test will likely fail if the route still has 'auth' middleware.
+        $response->assertOk();
+        $this->assertTrue($user->fresh()->hasVerifiedEmail());
+    }
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => 'invalid-hash']
-    );
+    public function test_email_verification_fails_with_invalid_hash(): void
+    {
+        $user = User::factory()->create(['email_verified_at' => null]);
 
-    $response = $this->actingAs($user, 'api')->getJson($verificationUrl);
+        $incorrectHash = sha1($user->getEmailForVerification() . 'tampered');
 
-    $response->assertStatus(400);
-    expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
-});
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => $incorrectHash]
+        );
+
+        // Request without actingAs, expecting JSON response
+        $response = $this->getJson($verificationUrl);
+
+        // Expecting 403 due to invalid signature from the 'signed' middleware
+        $response->assertStatus(403);
+        $this->assertFalse($user->fresh()->hasVerifiedEmail());
+    }
+}

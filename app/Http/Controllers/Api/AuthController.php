@@ -181,7 +181,7 @@ class AuthController extends Controller
   public function logout(Request $request)
   {
     JWTAuth::invalidate(JWTAuth::getToken());
-    return response()->json(['message' => 'Successfully logged out']);
+    return response()->noContent(); // Changed to return 204 No Content
   }
 
   public function forgotPassword(Request $request)
@@ -216,12 +216,18 @@ class AuthController extends Controller
     $status = Password::reset(
       $request->only('email', 'password', 'password_confirmation', 'token'),
       function ($user) use ($request) {
+        Log::info('Password reset callback executed for user: ' . $user->email);
         $user->forceFill([
           'password' => Hash::make($request->password),
           'remember_token' => Str::random(60),
         ])->save();
+        Log::info('User password updated and saved for: ' . $user->email);
+        // Manually dispatch the event
+        event(new \Illuminate\Auth\Events\PasswordReset($user));
       }
     );
+
+    Log::info('Status of Password::reset: ' . $status . ' for email: ' . $request->email);
 
     return $status === Password::PASSWORD_RESET
       ? response()->json(['message' => __($status)], 200)
