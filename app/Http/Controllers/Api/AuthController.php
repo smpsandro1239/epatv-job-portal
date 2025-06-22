@@ -89,9 +89,9 @@ class AuthController extends Controller
       // Handle Company Logo Upload
       if ($request->role === 'employer' && $request->hasFile('company_logo')) {
           if ($user->company_logo) { // Check if there's an old logo, though unlikely for new registration
-              Storage::delete($user->company_logo);
+              Storage::disk('public')->delete($user->company_logo); // Ensure using public disk for delete
           }
-          $path = $request->file('company_logo')->store('public/company_logos');
+          $path = $request->file('company_logo')->store('company_logos', 'public');
           $user->company_logo = $path;
           $user->save(); // Save user again to update company_logo path
       }

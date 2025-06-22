@@ -56,6 +56,10 @@ class EmployerJobController extends Controller
         $job = new Job($validatedData);
         $job->company_id = $employer->id;
         $job->posted_by = $employer->id; // Consistent with API controller
+        // If category_id is required and meant to be the same as area_of_interest_id
+        if (isset($validatedData['area_of_interest_id'])) {
+            $job->category_id = $validatedData['area_of_interest_id'];
+        }
         $job->save();
 
         // --- Start Notification Logic ---
@@ -136,6 +140,10 @@ class EmployerJobController extends Controller
         ]);
 
         $job->fill($validatedData);
+        // If category_id is required and meant to be the same as area_of_interest_id
+        if (isset($validatedData['area_of_interest_id'])) {
+            $job->category_id = $validatedData['area_of_interest_id'];
+        }
         $job->save();
 
         return redirect()->route('employer.jobs.index')->with('success', 'Job updated successfully.');

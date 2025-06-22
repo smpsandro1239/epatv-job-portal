@@ -72,8 +72,8 @@ class EmployerApplicationViewingTest extends TestCase
         $student1 = $this->createStudent();
         $student2 = $this->createStudent();
 
-        $app1 = $this->createApplicationRecord($student1, $job1);
-        $app2 = $this->createApplicationRecord($student2, $job2);
+        $app1 = $this->createApplicationRecord($student1, $job1, ['created_at' => now()->subMinute()]); // Older
+        $app2 = $this->createApplicationRecord($student2, $job2, ['created_at' => now()]);         // Newer
         // Application for another employer's job
         $employer2 = $this->createEmployer();
         $job_other_employer = $this->createJobForEmployer($employer2);

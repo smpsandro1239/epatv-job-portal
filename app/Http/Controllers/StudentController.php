@@ -100,18 +100,18 @@ class StudentController extends Controller
         // Handle Photo Upload
         if ($request->hasFile('photo')) {
             if ($user->photo) {
-                Storage::delete($user->photo);
+                Storage::disk('public')->delete($user->photo);
             }
-            $path = $request->file('photo')->store('public/user_photos');
+            $path = $request->file('photo')->store('user_photos', 'public');
             $user->photo = $path;
         }
 
         // Handle CV Upload
         if ($request->hasFile('cv')) {
             if ($user->cv) {
-                Storage::delete($user->cv);
+                Storage::disk('public')->delete($user->cv);
             }
-            $path = $request->file('cv')->store('public/user_cvs');
+            $path = $request->file('cv')->store('user_cvs', 'public');
             $user->cv = $path;
         }
 
