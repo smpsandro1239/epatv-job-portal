@@ -32,8 +32,17 @@ class SuperadminUserManagementTest extends TestCase
     public function test_superadmin_can_list_users_api()
     {
         $superadmin = $this->createSuperadmin();
-        $this->createStudent(['name' => 'Pending Student', 'registration_status' => 'pending']);
-        $this->createEmployer(['name' => 'Approved Employer', 'registration_status' => 'approved']);
+        // Ensure $studentPending is older so $employerApproved (newer) appears first when ordering by created_at desc
+        $studentPending = $this->createStudent([
+            'name' => 'Pending Student',
+            'registration_status' => 'pending',
+            'created_at' => now()->subMinute()
+        ]);
+        $employerApproved = $this->createEmployer([
+            'name' => 'Approved Employer',
+            'registration_status' => 'approved',
+            'created_at' => now()
+        ]);
         $this->createSuperadmin(['email' => 'another.super@example.com']); // Should not be listed by default
 
         $token = JWTAuth::fromUser($superadmin);
@@ -42,8 +51,8 @@ class SuperadminUserManagementTest extends TestCase
 
         $response->assertStatus(200)
                  ->assertJsonCount(2, 'data') // Pending Student + Approved Employer
-                 ->assertJsonPath('data.0.name', 'Approved Employer') // latest first
-                 ->assertJsonPath('data.1.name', 'Pending Student');
+                 ->assertJsonPath('data.0.name', $employerApproved->name) // latest first
+                 ->assertJsonPath('data.1.name', $studentPending->name);
     }
 
     public function test_superadmin_can_filter_users_by_role_api()

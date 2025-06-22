@@ -39,11 +39,11 @@ class SuperadminDashboardTest extends TestCase
 
     private function createJob(array $attributes = []): Job
     {
-        if (!isset($attributes['company_id'])) {
-            $attributes['company_id'] = $this->createEmployer()->id;
-        }
-        if (!isset($attributes['posted_by'])) {
-             $attributes['posted_by'] = $attributes['company_id'];
+        if (!isset($attributes['company_id']) || !isset($attributes['posted_by'])) {
+            // Or throw an exception if these are always required for this helper's usage in tests
+            $employer = $this->createEmployer(); // This line might still create an extra employer if not careful in setupDashboardData
+            $attributes['company_id'] = $attributes['company_id'] ?? $employer->id;
+            $attributes['posted_by'] = $attributes['posted_by'] ?? $employer->id;
         }
         if (!isset($attributes['area_of_interest_id'])) {
             $attributes['area_of_interest_id'] = $this->createAreaOfInterest()->id;
@@ -61,44 +61,57 @@ class SuperadminDashboardTest extends TestCase
 
     private function setupDashboardData()
     {
-        // Users
-        $this->createStudent(['registration_status' => 'pending', 'cv' => null]);
-        $this->createStudent(['registration_status' => 'approved', 'cv' => 'path/to/cv1.pdf']);
-        $this->createStudent(['registration_status' => 'approved', 'cv' => 'path/to/cv2.pdf']); // 2 students with CVs
-        $this->createEmployer(['registration_status' => 'approved']);
-        $this->createEmployer(['registration_status' => 'pending']); // 1 pending employer
+        // Users - Total 6 non-superadmin users
+        $student1 = $this->createStudent(['registration_status' => 'pending', 'cv' => null, 'email' => 's1@example.com']);
+        $student2 = $this->createStudent(['registration_status' => 'approved', 'cv' => 'path/to/cv1.pdf', 'email' => 's2@example.com']);
+        $student3 = $this->createStudent(['registration_status' => 'approved', 'cv' => 'path/to/cv2.pdf', 'email' => 's3@example.com']);
+        $employer1 = $this->createEmployer(['registration_status' => 'approved', 'email' => 'e1@example.com']);
+        $employer2 = $this->createEmployer(['registration_status' => 'pending', 'email' => 'e2@example.com']);
+        $studentForApp = $this->createStudent(['email' => 'another@student.com', 'cv' => 'path/to/cv_app.pdf']); // Student with CV for application stats
 
         // Areas of Interest
         $areaTech = $this->createAreaOfInterest(['name' => 'Technology']);
         $areaMarketing = $this->createAreaOfInterest(['name' => 'Marketing']);
 
         // Jobs
-        $this->createJob([
-            'location' => 'New York',
-            'area_of_interest_id' => $areaTech->id,
+        $job1 = $this->createJob([
+            'company_id' => $employer1->id, 'posted_by' => $employer1->id,
+            'location' => 'New York', 'area_of_interest_id' => $areaTech->id,
             'contract_type' => 'Full-Time',
             'created_at' => Carbon::now()->subMonths(1)
         ]);
         $this->createJob([
-            'location' => 'New York',
-            'area_of_interest_id' => $areaMarketing->id,
+            'company_id' => $employer1->id, 'posted_by' => $employer1->id,
+            'location' => 'New York', 'area_of_interest_id' => $areaMarketing->id,
             'contract_type' => 'Part-Time',
             'created_at' => Carbon::now()
         ]);
         $this->createJob([
-            'location' => 'London',
-            'area_of_interest_id' => $areaTech->id,
+            'company_id' => $employer2->id, 'posted_by' => $employer2->id,
+            'location' => 'London', 'area_of_interest_id' => $areaTech->id,
             'contract_type' => 'Full-Time',
             'created_at' => Carbon::now()->subMonths(2)
         ]);
 
         // Applications
-        $job1 = Job::first();
-        $student1 = User::where('role', 'student')->first();
-        if ($job1 && $student1) {
-            $this->createTestApplication($student1, $job1);
-            $this->createTestApplication($this->createStudent(['email' => 'another@student.com']), $job1); // 2 apps for job1
+        // $job1 is already defined from above if that's the one we want to use for applications.
+        // Using $studentForApp for applications.
+        if ($job1 && $studentForApp) { // $job1 was defined when creating jobs for $employer1
+            $this->createTestApplication($studentForApp, $job1);
+            // If we need a second application for the 'total_applications' count:
+            // Let's use another existing student for the second application to keep user count controlled.
+             if ($student2) { // $student2 was created earlier
+                 $this->createTestApplication($student2, $job1);
+             }
         }
+        // With this setup:
+        // Users: $student1, $student2, $student3, $employer1, $employer2, $studentForApp = 6 users
+        // Pending: $student1, $employer2 = 2 pending
+        // Students: $student1, $student2, $student3, $studentForApp = 4 students
+        // Employers: $employer1, $employer2 = 2 employers
+        // Students with CV: $student2, $student3, $studentForApp = 3 students with CV
+        // Total Jobs: 3
+        // Total Applications: 2 (if $student2 exists, otherwise 1)
     }
 
 
@@ -120,14 +133,14 @@ class SuperadminDashboardTest extends TestCase
                 'total_applications',
                 'jobs_by_location', 'jobs_by_area', 'jobs_by_month', 'jobs_by_contract_type'
             ])
-            ->assertJsonCount(3, 'jobs_by_month') // Example check based on setup
-            ->assertJsonPath('total_users', 5) // 3 students + 2 employers
-            ->assertJsonPath('pending_registrations', 2) // 1 student + 1 employer
-            ->assertJsonPath('students_count', 3)
+            ->assertJsonCount(3, 'jobs_by_month')
+            ->assertJsonPath('total_users', 6) // Updated count
+            ->assertJsonPath('pending_registrations', 2)
+            ->assertJsonPath('students_count', 4) // Updated count
             ->assertJsonPath('employers_count', 2)
-            ->assertJsonPath('students_with_cv_count', 2)
+            ->assertJsonPath('students_with_cv_count', 3) // Updated count
             ->assertJsonPath('total_jobs', 3)
-            ->assertJsonPath('total_applications', 2);
+            ->assertJsonPath('total_applications', 2); // Updated count
 
         // Example check for grouped data structure
         $response->assertJsonPath('jobs_by_location.0.location', 'New York'); // Assuming NY has most jobs
@@ -156,21 +169,21 @@ class SuperadminDashboardTest extends TestCase
         $response->assertStatus(200)
                  ->assertViewIs('admin.dashboard')
                  ->assertViewHas('stats')
-                 ->assertSeeTextInOrder([ // Check stat cards are rendering some values
-                     'Total Users', '5',
+                 ->assertSeeTextInOrder([
+                     'Total Users', '6',
                      'Total Jobs', '3',
                      'Pending Registrations', '2',
                      'Total Applications', '2',
                  ]);
 
         $stats = $response->viewData('stats');
-        $this->assertEquals(5, $stats['total_users']);
-        $this->assertEquals(3, $stats['students_count']);
-        $this->assertEquals(2, $stats['employers_count']);
-        $this->assertEquals(2, $stats['students_with_cv_count']);
-        $this->assertCount(2, $stats['jobs_by_location_all']); // NY, London
-        $this->assertCount(2, $stats['jobs_by_area_all']);   // Tech, Marketing
-        $this->assertCount(2, $stats['jobs_by_contract_type_all']); // Full-Time, Part-Time
+        $this->assertEquals(6, $stats['total_users']);
+        $this->assertEquals(4, $stats['active_job_seekers_count']); // Key corrected
+        $this->assertEquals(2, $stats['active_employers_count']); // Key corrected
+        $this->assertEquals(3, $stats['student_profiles_completed_count']); // Key corrected
+        $this->assertCount(2, $stats['jobs_by_location_all']);
+        $this->assertCount(2, $stats['jobs_by_area_all']);
+        $this->assertCount(2, $stats['jobs_by_contract_type_all']);
         $this->assertCount(3, $stats['jobs_by_month']);
     }
 

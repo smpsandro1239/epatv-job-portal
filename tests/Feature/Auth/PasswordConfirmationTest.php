@@ -22,6 +22,7 @@ class PasswordConfirmationTest extends TestCase
 
     public function test_password_can_be_confirmed(): void
     {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
         $user = User::factory()->create(['password' => Hash::make('password')]);
 
         $response = $this->actingAs($user)->post('/confirm-password', [

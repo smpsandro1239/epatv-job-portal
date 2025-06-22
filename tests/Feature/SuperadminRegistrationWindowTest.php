@@ -177,8 +177,17 @@ class SuperadminRegistrationWindowTest extends TestCase
             'max_registrations' => $window->max_registrations,
             'password' => 'newWebPassword123',
             'password_confirmation' => 'newWebPassword123',
-            'is_active' => $window->is_active ? '1' : null,
+            // 'is_active' will be conditionally added below
         ];
+
+        // Simulate checkbox behavior: only send 'is_active' if it's meant to be true.
+        // The controller AdminController@updateRegistrationWindow uses $request->has('is_active').
+        if ($window->is_active) { // Maintain current state for this test, or set to a specific state if needed
+            $updateData['is_active'] = '1';
+        }
+        // If $window->is_active is false, 'is_active' will not be in $updateData.
+        // Controller's $request->has('is_active') will correctly evaluate to false.
+
 
         $response = $this->actingAs($superadmin)->put('/admin/registration-window', $updateData);
         $response->assertRedirect('/admin/registration-window')->assertSessionHas('success');

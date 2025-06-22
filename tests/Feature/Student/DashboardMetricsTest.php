@@ -34,12 +34,12 @@ class DashboardMetricsTest extends TestCase
         $response->assertViewHasAll(['user', 'myApplicationsCount', 'jobsInPreferredAreasCount']);
 
         // Extract all view data
-        $viewData = $response->viewData(null);
+        // $viewData = $response->viewData(null); // Old problematic line
 
         return [
-            'user' => $viewData['user'],
-            'myApplicationsCount' => $viewData['myApplicationsCount'],
-            'jobsInPreferredAreasCount' => $viewData['jobsInPreferredAreasCount'],
+            'user' => $response->viewData('user'),
+            'myApplicationsCount' => $response->viewData('myApplicationsCount'),
+            'jobsInPreferredAreasCount' => $response->viewData('jobsInPreferredAreasCount'),
         ];
     }
 

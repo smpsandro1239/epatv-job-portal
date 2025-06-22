@@ -70,7 +70,7 @@ class StudentJobInteractionTest extends TestCase
         $response = $this->get('/jobs');
         $response->assertStatus(200);
         // Check for pagination elements, specific class depends on pagination view
-        $response->assertSee('pagination'); // Generic check, refine if using specific pagination views like Bootstrap/Tailwind
+        $response->assertSeeText('Next');
     }
 
     public function test_filter_jobs_by_area_of_interest()
@@ -145,6 +145,13 @@ class StudentJobInteractionTest extends TestCase
     public function test_filter_values_are_retained_in_view()
     {
         $area = $this->createAreaOfInterest();
+        // Create a job with specific values so they appear in the dropdowns
+        $this->createJob([
+            'area_of_interest_id' => $area->id,
+            'location' => 'TestLocation',
+            'contract_type' => 'TestType'
+        ]);
+
         $response = $this->get('/jobs?area_of_interest_id=' . $area->id . '&location=TestLocation&contract_type=TestType');
 
         $response->assertStatus(200)
