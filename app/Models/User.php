@@ -79,9 +79,9 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     /**
      * Get the database notifications for the user.
      */
-    public function notifications()
-    {
-        // Using App\Models\Notification directly, alias if needed at the top of the file
-        return $this->hasMany(\App\Models\Notification::class)->orderBy('created_at', 'desc');
-    }
+    // public function notifications()
+    // {
+    //     // Using App\Models\Notification directly, alias if needed at the top of the file
+    //     return $this->hasMany(\App\Models\Notification::class)->orderBy('created_at', 'desc');
+    // }
 }

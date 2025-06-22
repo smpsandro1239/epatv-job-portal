@@ -103,20 +103,20 @@ class StudentController extends Controller
         if ($request->hasFile('photo')) {
             // Delete old photo if exists
             if ($user->photo) {
-                Storage::delete($user->photo);
+                Storage::disk('public')->delete($user->photo);
             }
-            $path = $request->file('photo')->store('public/user_photos'); // Store in 'storage/app/public/user_photos'
-            $user->photo = $path; // Save path relative to 'storage/app'
+            $path = $request->file('photo')->store('user_photos', 'public');
+            $user->photo = $path;
         }
 
         // Handle CV Upload
         if ($request->hasFile('cv')) {
             // Delete old CV if exists
             if ($user->cv) {
-                Storage::delete($user->cv);
+                Storage::disk('public')->delete($user->cv);
             }
-            $path = $request->file('cv')->store('public/user_cvs'); // Store in 'storage/app/public/user_cvs'
-            $user->cv = $path; // Save path relative to 'storage/app'
+            $path = $request->file('cv')->store('user_cvs', 'public');
+            $user->cv = $path;
         }
 
         $user->save();

@@ -56,8 +56,16 @@ class EmployerJobManagementTest extends TestCase
     public function test_employer_can_list_own_jobs_api()
     {
         $employer1 = $this->createEmployer();
-        $job1 = $this->createJobForEmployer($employer1, ['title' => 'Job 1 by Employer 1']);
-        $job2 = $this->createJobForEmployer($employer1, ['title' => 'Job 2 by Employer 1']);
+
+        // Ensure $job1 is older than $job2
+        $job1 = $this->createJobForEmployer($employer1, [
+            'title' => 'Job 1 by Employer 1',
+            'created_at' => now()->subMinute() // Older
+        ]);
+        $job2 = $this->createJobForEmployer($employer1, [
+            'title' => 'Job 2 by Employer 1',
+            'created_at' => now() // Newer
+        ]);
 
         $employer2 = $this->createEmployer();
         $this->createJobForEmployer($employer2, ['title' => 'Job by Employer 2']);
@@ -68,8 +76,8 @@ class EmployerJobManagementTest extends TestCase
 
         $response->assertStatus(200)
                  ->assertJsonCount(2, 'data')
-                 ->assertJsonPath('data.0.title', $job2->title) // latest first
-                 ->assertJsonPath('data.1.title', $job1->title);
+                 ->assertJsonPath('data.0.title', $job2->title) // Expect $job2 (newer) first
+                 ->assertJsonPath('data.1.title', $job1->title); // Expect $job1 (older) second
     }
 
     public function test_employer_can_create_job_api()

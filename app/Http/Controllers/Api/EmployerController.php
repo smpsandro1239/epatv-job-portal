@@ -88,14 +88,14 @@ class EmployerController extends Controller
         // Handle Company Logo Upload
         if ($request->hasFile('company_logo')) {
             if ($user->company_logo) {
-                Storage::delete($user->company_logo);
+                Storage::disk('public')->delete($user->company_logo);
             }
-            $path = $request->file('company_logo')->store('public/company_logos');
+            $path = $request->file('company_logo')->store('company_logos', 'public');
             $user->company_logo = $path;
         } elseif ($request->exists('company_logo') && is_null($request->input('company_logo'))) {
             // If 'company_logo' is explicitly sent as null (e.g. to remove logo without uploading new one)
             if ($user->company_logo) {
-                Storage::delete($user->company_logo);
+                Storage::disk('public')->delete($user->company_logo);
                 $user->company_logo = null;
             }
         }

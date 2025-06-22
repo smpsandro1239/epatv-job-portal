@@ -47,12 +47,14 @@ class EmployerJobController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $job = new Job($request->all());
+        $validatedData = $validator->validated(); // Use validated data
+        $job = new Job($validatedData);
         $job->company_id = $employer->id;
-        // Assuming 'posted_by' should also be the employer for their own job posts.
-        // If 'posted_by' has a different meaning (e.g., an admin posting on behalf of company), this might change.
-        // For now, setting both to the employer.
         $job->posted_by = $employer->id;
+        // If category_id is required and meant to be the same as area_of_interest_id
+        if (isset($validatedData['area_of_interest_id'])) {
+            $job->category_id = $validatedData['area_of_interest_id'];
+        }
         $job->save();
 
         $job->load('areaOfInterest'); // Load for the response
