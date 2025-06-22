@@ -8,7 +8,7 @@
             <form method="POST" action="{{ route('register.store') }}" enctype="multipart/form-data">
                 @csrf
                 {{-- Hidden role input, value set by controller via $type --}}
-                <input type="hidden" name="role" value="{{ $type ?? old('role', 'student') }}">
+                <input type="hidden" name="role" value="{{ ($type === 'company') ? 'employer' : ($type ?? old('role', 'student')) }}">
 
                 <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Create Your Account as {{ ucfirst($type ?? 'User') }}</h2>
 
