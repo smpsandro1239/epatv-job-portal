@@ -160,6 +160,23 @@ class EmployerController extends Controller
             ->latest() // Order by latest applications first
             ->paginate(15); // Or a configurable number
 
-        return response()->json($applications);
+        return response()->json([
+            'data' => $applications->items(),
+            'links' => [
+                'first' => $applications->url(1),
+                'last' => $applications->url($applications->lastPage()),
+                'prev' => $applications->previousPageUrl(),
+                'next' => $applications->nextPageUrl(),
+            ],
+            'meta' => [
+                'current_page' => $applications->currentPage(),
+                'from' => $applications->firstItem(),
+                'last_page' => $applications->lastPage(),
+                'path' => $applications->path(),
+                'per_page' => $applications->perPage(),
+                'to' => $applications->lastItem(),
+                'total' => $applications->total(),
+            ],
+        ]);
     }
 }

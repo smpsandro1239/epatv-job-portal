@@ -163,7 +163,7 @@ class EmployerApplicationViewingTest extends TestCase
                  ->assertViewHas('applications', function($applications) {
                      return $applications->count() == 10; // Web pagination is 10
                  });
-        $response->assertSee('pagination');
+        $response->assertSeeText('Next');
     }
 
     public function test_list_employer_applications_requires_authentication_web()
